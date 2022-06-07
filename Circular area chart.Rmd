@@ -1,0 +1,110 @@
+---
+title: "Circular area chart"
+author: "Lukas"
+date: '2022-06-05'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+# Load packages
+
+```{r}
+library("tidyverse")
+library("psych")
+library("pheatmap")
+library("ggpubr")
+library("patchwork")
+library("ghibli")
+library("reprex")
+library("ggh4x")
+library("ggplot2")
+lit_path <-"C:/Users/lukwolt/Documents/R/LIT/"
+ot_path <-"C:/Users/lukwolt/Documents/R/OT/"
+
+ghibli_palettes$YesterdayMedium
+
+```
+#Load Data 
+
+-add column with condition to each file
+-combine every file with rbind()
+-group and calculate median with group_by(condition) %>% summarise(median_ppp = median(ppp))
+
+## Load Data
+8ms
+```{r}
+LITDIA_Turbo_8ms_1_PPP <- read.csv2(paste0(lit_path, "PPP_LIT_Turbo_DIA_1ng_40SPD_1CV_8ms_40w.tsv"))
+```
+
+16ms
+```{r}
+LITDIA_Turbo_16ms_1_PPP <- read.csv2(paste0(lit_path, "PPP_LIT_Turbo_DIA_1ng_40SPD_1CV_16ms_40w.tsv"))
+```
+
+23ms
+```{r}
+LITDIA_Turbo_23ms_1_PPP <- read.csv2(paste0(lit_path, "PPP_LIT_Turbo_DIA_1ng_40SPD_1CV_23ms_40w.tsv"))
+LITDIA_Rapid_23ms_1_PPP <- read.csv2(paste0(lit_path, "PPP_LIT_Rapid_DIA_1ng_40SPD_1CV_23ms_40w.tsv"))
+```
+
+38ms
+```{r}
+LITDIA_Turbo_38ms_1_PPP <- read.csv2(paste0(lit_path, "PPP_LIT_Turbo_DIA_1ng_40SPD_1CV_38ms_40w.tsv"))
+LITDIA_Rapid_38ms_1_PPP <- read.csv2(paste0(lit_path, "PPP_LIT_Rapid_DIA_1ng_40SPD_1CV_38ms_40w.tsv"))
+LITDIA_Normal_38ms_1_PPP <- read.csv2(paste0(lit_path, "PPP_LIT_Normal_DIA_1ng_40SPD_1CV_38ms_40w.tsv"))
+```
+## Add condition
+```{r}
+LITDIA_Turbo_8ms_1_PPP$method <- "Turbo_8ms"
+LITDIA_Turbo_16ms_1_PPP$method <- "Turbo_16ms"
+LITDIA_Turbo_23ms_1_PPP$method <- "Turbo_23ms"
+LITDIA_Rapid_23ms_1_PPP$method <- "Rapid_23ms"
+LITDIA_Turbo_38ms_1_PPP$method <- "Turbo_38ms"
+LITDIA_Rapid_38ms_1_PPP$method <- "Rapid_38ms"
+LITDIA_Normal_38ms_1_PPP$method <- "Normal_38ms"
+
+colnames(LITDIA_Turbo_8ms_1_PPP)[1] <- colnames(LITDIA_Turbo_16ms_1_PPP)[1] <- colnames(LITDIA_Turbo_23ms_1_PPP)[1]<- colnames(LITDIA_Rapid_23ms_1_PPP)[1] <- colnames(LITDIA_Turbo_38ms_1_PPP)[1]<- colnames(LITDIA_Rapid_38ms_1_PPP)[1] <- colnames(LITDIA_Normal_38ms_1_PPP)[1] <- "PPP"
+```
+
+## Combine files 
+```{r}
+rbind(LITDIA_Turbo_8ms_1_PPP, LITDIA_Turbo_16ms_1_PPP, LITDIA_Turbo_23ms_1_PPP, LITDIA_Rapid_23ms_1_PPP, LITDIA_Turbo_38ms_1_PPP, LITDIA_Rapid_38ms_1_PPP, LITDIA_Normal_38ms_1_PPP)
+```
+
+#group and calculate median 
+```{r}
+group_by(LITDIA_Turbo_8ms_1_PPP) %>% summarise(median_ppp = median(PPP))
+```
+
+#Circular area chart
+
+```{r}
+idk <- read.csv(paste0(table_path, "table_lit.csv"))
+idk <- idk[, c(8,9, 10)] 
+idk$inv_median_CV <- 1/idk$median_CV
+max <- 
+  data.frame(pep_id = max(idk$pep_id) + (max(idk$pep_id)- min(idk$pep_id))/4, 
+             inv_median_CV = max(idk$inv_median_CV) + (max(idk$inv_median_CV)- min(idk$inv_median_CV))/4,
+             median_ppp = max(idk$median_ppp) + (max(idk$median_ppp)- min(idk$median_ppp))/4)
+
+min <- 
+  data.frame(pep_id = min(idk$pep_id) - (max(idk$pep_id)- min(idk$pep_id))/4, 
+             inv_median_CV = min(idk$inv_median_CV) - (max(idk$inv_median_CV)- min(idk$inv_median_CV))/4,
+             median_ppp = min(idk$median_ppp) - (max(idk$median_ppp)- min(idk$median_ppp))/4)
+
+d <- rbind(max, min, idk[, -2])
+
+radarchart(d,
+            pfcol = c("#FF000040", "#00FF0040", "#0000FF40"),
+            pcol = c("#FF0000", "#00FF00", "#0000FF"),
+           cglty = 1)
+
+legend("topright",
+       legend = c("Turbo", "Rapid", "Normal"),
+       bty = "n", pch = 20, col = c("#FF0000", "#00FF00", "#0000FF"),
+       text.col = "grey25", pt.cex = 2)
+```
