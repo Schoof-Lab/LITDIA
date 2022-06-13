@@ -1,5 +1,5 @@
 ---
-title: "OT_vs_LIT_complete"
+title: "LIT-DIA_complete"
 output:
   html_document:
     toc: true
@@ -26,10 +26,10 @@ library("patchwork")
 library("ggpubr")
 library("ggpointdensity")
 library("kableExtra")
-library("Cairo")
 library("ggupset")
 library("pheatmap")
 library("robustbase")
+library("fmsb")
 
 #set bw theme as default theme
 theme_set(theme_bw())
@@ -48,7 +48,7 @@ lit_path <-
 ot_path <- 
   "C://Users/samgr/OneDrive - UCL/Documents/Internship/Data/LITDIA/OT/"
 pp_path <- 
-  "C://Users/samgr/OneDrive - UCL/Documents/Internship/Data/LITDIA/points per peak/"
+  "C://Users/samgr/OneDrive - UCL/Documents/Internship/Data/LITDIA/points_across_a_peak/"
 ```
 
 
@@ -462,17 +462,12 @@ upset(fromList(pep_list),
 ## Load data
 LIT Turbo DIA
 ```{r}
-LITDIA_Turbo_1 <- read.csv2(paste0(lit_path, "20220420_LIT_Turbo_DIA_1ng_40SPD_whisper100_1CV_8ms.csv"))
-LITDIA_Turbo_5 <- read.csv2(paste0(lit_path, "20220420_LIT_Turbo_DIA_5ng_40SPD_whisper100_1CV_8ms.csv"))
-LITDIA_Turbo_10 <- read.csv2(paste0(lit_path, "20220420_LIT_Turbo_DIA_10ng_40SPD_whisper100_1CV_8ms.csv"))
-LITDIA_Turbo_100 <- read.csv2(paste0(lit_path, "20220420_LIT_Turbo_DIA_100ng_40SPD_whisper100_1CV_8ms.csv"))
+LITDIA_Turbo_1 <- read.csv2(paste0(lit_path, "20220502_LIT_Turbo_DIA_1ng_40SPD_whisper100_1CV_auto.csv"))
+LITDIA_Turbo_5 <- read.csv2(paste0(lit_path, "20220502_LIT_Turbo_DIA_5ng_40SPD_whisper100_1CV_auto.csv"))
+LITDIA_Turbo_10 <- read.csv2(paste0(lit_path, "20220502_LIT_Turbo_DIA_10ng_40SPD_whisper100_1CV_auto.csv"))
+LITDIA_Turbo_100 <- read.csv2(paste0(lit_path, "20220502_LIT_Turbo_DIA_100ng_40SPD_whisper100_1CV_auto.csv"))
 
-LITDIA_Turbo_1_auto <- read.csv2(paste0(lit_path, "20220502_LIT_Turbo_DIA_1ng_40SPD_whisper100_1CV_auto.csv"))
-LITDIA_Turbo_5_auto <- read.csv2(paste0(lit_path, "20220502_LIT_Turbo_DIA_5ng_40SPD_whisper100_1CV_auto.csv"))
-LITDIA_Turbo_10_auto <- read.csv2(paste0(lit_path, "20220502_LIT_Turbo_DIA_10ng_40SPD_whisper100_1CV_auto.csv"))
-LITDIA_Turbo_100_auto <- read.csv2(paste0(lit_path, "20220502_LIT_Turbo_DIA_100ng_40SPD_whisper100_1CV_auto.csv"))
-
-LITDIA_Turbo_1_auto$EG.IsImputed %>% table()
+LITDIA_Turbo_1$EG.IsImputed %>% table()
 ```
 
 LIT Rapid DIA
@@ -550,8 +545,8 @@ OTDIA_15k_1_filter <- OTDIA_15k_1[OTDIA_15k_1$filtered == FALSE,]
 OTDIA_30k_1 <-  filter_pep(OTDIA_30k_1)
 OTDIA_30k_1_filter <- OTDIA_30k_1[OTDIA_30k_1$filtered == FALSE,]
 
-LITDIA_Turbo_1_auto <- filter_pep(LITDIA_Turbo_1_auto)
-LITDIA_Turbo_1_auto_filter <- LITDIA_Turbo_1_auto[LITDIA_Turbo_1_auto$filtered == FALSE,]
+LITDIA_Turbo_1 <- filter_pep(LITDIA_Turbo_1)
+LITDIA_Turbo_1_filter <- LITDIA_Turbo_1[LITDIA_Turbo_1$filtered == FALSE,]
 LITDIA_Rapid_1 <- filter_pep(LITDIA_Rapid_1)
 LITDIA_Rapid_1_filter <- LITDIA_Rapid_1[LITDIA_Rapid_1$filtered == FALSE,]
 LITDIA_Normal_1 <- filter_pep(LITDIA_Normal_1)
@@ -568,8 +563,8 @@ OTDIA_15k_5_filter <- OTDIA_15k_5[OTDIA_15k_5$filtered == FALSE,]
 OTDIA_30k_5 <-  filter_pep(OTDIA_30k_5)
 OTDIA_30k_5_filter <- OTDIA_30k_5[OTDIA_30k_5$filtered == FALSE,]
 
-LITDIA_Turbo_5_auto <- filter_pep(LITDIA_Turbo_5_auto)
-LITDIA_Turbo_5_auto_filter <- LITDIA_Turbo_5_auto[LITDIA_Turbo_5_auto$filtered == FALSE,]
+LITDIA_Turbo_5 <- filter_pep(LITDIA_Turbo_5)
+LITDIA_Turbo_5_filter <- LITDIA_Turbo_5[LITDIA_Turbo_5$filtered == FALSE,]
 LITDIA_Rapid_5 <- filter_pep(LITDIA_Rapid_5)
 LITDIA_Rapid_5_filter <- LITDIA_Rapid_5[LITDIA_Rapid_5$filtered == FALSE,]
 LITDIA_Normal_5 <- filter_pep(LITDIA_Normal_5)
@@ -586,8 +581,8 @@ OTDIA_15k_10_filter <- OTDIA_15k_10[OTDIA_15k_10$filtered == FALSE,]
 OTDIA_30k_10 <-  filter_pep(OTDIA_30k_10)
 OTDIA_30k_10_filter <- OTDIA_30k_10[OTDIA_30k_10$filtered == FALSE,]
 
-LITDIA_Turbo_10_auto <- filter_pep(LITDIA_Turbo_10_auto)
-LITDIA_Turbo_10_auto_filter <- LITDIA_Turbo_10_auto[LITDIA_Turbo_10_auto$filtered == FALSE,]
+LITDIA_Turbo_10 <- filter_pep(LITDIA_Turbo_10)
+LITDIA_Turbo_10_filter <- LITDIA_Turbo_10[LITDIA_Turbo_10$filtered == FALSE,]
 LITDIA_Rapid_10 <- filter_pep(LITDIA_Rapid_10)
 LITDIA_Rapid_10_filter <- LITDIA_Rapid_10[LITDIA_Rapid_10$filtered == FALSE,]
 LITDIA_Normal_10 <- filter_pep(LITDIA_Normal_10)
@@ -604,8 +599,8 @@ OTDIA_15k_100_filter <- OTDIA_15k_100[OTDIA_15k_100$filtered == FALSE,]
 OTDIA_30k_100 <-  filter_pep(OTDIA_30k_100)
 OTDIA_30k_100_filter <- OTDIA_30k_100[OTDIA_30k_100$filtered == FALSE,]
 
-LITDIA_Turbo_100_auto <- filter_pep(LITDIA_Turbo_100_auto)
-LITDIA_Turbo_100_auto_filter <- LITDIA_Turbo_100_auto[LITDIA_Turbo_100_auto$filtered == FALSE,]
+LITDIA_Turbo_100 <- filter_pep(LITDIA_Turbo_100)
+LITDIA_Turbo_100_filter <- LITDIA_Turbo_100[LITDIA_Turbo_100$filtered == FALSE,]
 LITDIA_Rapid_100 <- filter_pep(LITDIA_Rapid_100)
 LITDIA_Rapid_100_filter <- LITDIA_Rapid_100[LITDIA_Rapid_100$filtered == FALSE,]
 LITDIA_Normal_100 <- filter_pep(LITDIA_Normal_100)
@@ -619,7 +614,7 @@ LITDIA_Normal_100_filter <- LITDIA_Normal_100[LITDIA_Normal_100$filtered == FALS
 ```{r}
 Turbo_vs_7k_1_facet <- 
   inner_join(OTDIA_7k_1_filter[,c(1,6)],
-             LITDIA_Turbo_1_auto_filter[,c(1,6)],
+             LITDIA_Turbo_1_filter[,c(1,6)],
              by = "PEP.StrippedSequence",
              suffix = c("_OT", "_LIT"))
 Turbo_vs_7k_1_facet$method <- "LIT Turbo vs OT 7.5k"
@@ -647,7 +642,7 @@ Normal_vs_30k_1_facet$input <- "1 ng"
 ```{r}
 Turbo_vs_7k_5_facet <- 
   inner_join(OTDIA_7k_5_filter[,c(1,6)],
-             LITDIA_Turbo_5_auto_filter[,c(1,6)],
+             LITDIA_Turbo_5_filter[,c(1,6)],
              by = "PEP.StrippedSequence",
              suffix = c("_OT", "_LIT"))
 Turbo_vs_7k_5_facet$method <- "LIT Turbo vs OT 7.5k"
@@ -675,7 +670,7 @@ Normal_vs_30k_5_facet$input <- "5 ng"
 ```{r}
 Turbo_vs_7k_10_facet <- 
   inner_join(OTDIA_7k_10_filter[,c(1,6)],
-             LITDIA_Turbo_10_auto_filter[,c(1,6)],
+             LITDIA_Turbo_10_filter[,c(1,6)],
              by = "PEP.StrippedSequence",
              suffix = c("_OT", "_LIT"))
 Turbo_vs_7k_10_facet$method <- "LIT Turbo vs OT 7.5k"
@@ -703,7 +698,7 @@ Normal_vs_30k_10_facet$input <- "10 ng"
 ```{r}
 Turbo_vs_7k_100_facet <-  
   inner_join(OTDIA_7k_100_filter[,c(1,6)],
-             LITDIA_Turbo_100_auto_filter[,c(1,6)],
+             LITDIA_Turbo_100_filter[,c(1,6)],
              by = "PEP.StrippedSequence",
              suffix = c("_OT", "_LIT"))
 Turbo_vs_7k_100_facet$method <- "LIT Turbo vs OT 7.5k"
@@ -750,7 +745,6 @@ corr_plot <- facet %>%
   theme(legend.position = "none",
         axis.text.x = element_text(angle = 90,
                                    vjust = 0.3),
-        panel.grid = element_blank(),
         axis.title = element_text(size = 27),
         axis.text = element_text(size = 24),
         strip.text.x = element_text(size = 27),
@@ -832,10 +826,10 @@ temp %>%
 
 ```{r}
 #Turbo
-LITDIA_Turbo_1_auto_filter$in_OT <- 
-  LITDIA_Turbo_1_auto_filter$PEP.StrippedSequence %in%
+LITDIA_Turbo_1_filter$in_OT <- 
+  LITDIA_Turbo_1_filter$PEP.StrippedSequence %in%
   OTDIA_7k_1_filter$PEP.StrippedSequence
-LITDIA_Turbo_1_auto_filter$method <- "Turbo"
+LITDIA_Turbo_1_filter$method <- "Turbo"
 
 #Rapid
 LITDIA_Rapid_1_filter$in_OT <- 
@@ -850,7 +844,7 @@ LITDIA_Normal_1_filter$in_OT <-
 LITDIA_Normal_1_filter$method <- "Normal"
 
 #Input
-LITDIA_Turbo_1_auto_filter$input <-
+LITDIA_Turbo_1_filter$input <-
   LITDIA_Rapid_1_filter$input <-
   LITDIA_Normal_1_filter$input <- "1 ng"
 ```
@@ -859,10 +853,10 @@ LITDIA_Turbo_1_auto_filter$input <-
 
 ```{r}
 #Turbo
-LITDIA_Turbo_5_auto_filter$in_OT <- 
-  LITDIA_Turbo_5_auto_filter$PEP.StrippedSequence %in%
+LITDIA_Turbo_5_filter$in_OT <- 
+  LITDIA_Turbo_5_filter$PEP.StrippedSequence %in%
   OTDIA_7k_5_filter$PEP.StrippedSequence
-LITDIA_Turbo_5_auto_filter$method <- "Turbo"
+LITDIA_Turbo_5_filter$method <- "Turbo"
 
 #Rapid
 LITDIA_Rapid_5_filter$in_OT <- 
@@ -877,7 +871,7 @@ LITDIA_Normal_5_filter$in_OT <-
 LITDIA_Normal_5_filter$method <- "Normal"
 
 #Input
-LITDIA_Turbo_5_auto_filter$input <-
+LITDIA_Turbo_5_filter$input <-
   LITDIA_Rapid_5_filter$input <-
   LITDIA_Normal_5_filter$input <- "5 ng"
 ```
@@ -886,10 +880,10 @@ LITDIA_Turbo_5_auto_filter$input <-
 
 ```{r}
 #Turbo
-LITDIA_Turbo_10_auto_filter$in_OT <- 
-  LITDIA_Turbo_10_auto_filter$PEP.StrippedSequence %in%
+LITDIA_Turbo_10_filter$in_OT <- 
+  LITDIA_Turbo_10_filter$PEP.StrippedSequence %in%
   OTDIA_7k_10_filter$PEP.StrippedSequence
-LITDIA_Turbo_10_auto_filter$method <- "Turbo"
+LITDIA_Turbo_10_filter$method <- "Turbo"
 
 #Rapid
 LITDIA_Rapid_10_filter$in_OT <- 
@@ -904,7 +898,7 @@ LITDIA_Normal_10_filter$in_OT <-
 LITDIA_Normal_10_filter$method <- "Normal"
 
 #Input
-LITDIA_Turbo_10_auto_filter$input <-
+LITDIA_Turbo_10_filter$input <-
   LITDIA_Rapid_10_filter$input <-
   LITDIA_Normal_10_filter$input <- "10 ng"
 ```
@@ -913,10 +907,10 @@ LITDIA_Turbo_10_auto_filter$input <-
 
 ```{r}
 #Turbo
-LITDIA_Turbo_100_auto_filter$in_OT <- 
-  LITDIA_Turbo_100_auto_filter$PEP.StrippedSequence %in%
+LITDIA_Turbo_100_filter$in_OT <- 
+  LITDIA_Turbo_100_filter$PEP.StrippedSequence %in%
   OTDIA_7k_100_filter$PEP.StrippedSequence
-LITDIA_Turbo_100_auto_filter$method <- "Turbo"
+LITDIA_Turbo_100_filter$method <- "Turbo"
 
 #Rapid
 LITDIA_Rapid_100_filter$in_OT <- 
@@ -931,7 +925,7 @@ LITDIA_Normal_100_filter$in_OT <-
 LITDIA_Normal_100_filter$method <- "Normal"
 
 #Input
-LITDIA_Turbo_100_auto_filter$input <-
+LITDIA_Turbo_100_filter$input <-
   LITDIA_Rapid_100_filter$input <- 
   LITDIA_Normal_100_filter$input <- "100 ng"
 ```
@@ -940,8 +934,8 @@ LITDIA_Turbo_100_auto_filter$input <-
 
 ```{r}
 OT_in_LIT <- 
-  rbind(LITDIA_Turbo_1_auto_filter[,c(1,6:10)], LITDIA_Turbo_5_auto_filter[,c(1,6:10)],
-        LITDIA_Turbo_10_auto_filter[,c(1,6:10)], LITDIA_Turbo_100_auto_filter[,c(1,6:10)],
+  rbind(LITDIA_Turbo_1_filter[,c(1,6:10)], LITDIA_Turbo_5_filter[,c(1,6:10)],
+        LITDIA_Turbo_10_filter[,c(1,6:10)], LITDIA_Turbo_100_filter[,c(1,6:10)],
         LITDIA_Rapid_1_filter[,c(1,6:10)], LITDIA_Rapid_5_filter[,c(1,6:10)],
         LITDIA_Rapid_10_filter[,c(1,6:10)], LITDIA_Rapid_100_filter[,c(1,6:10)],
         LITDIA_Normal_1_filter[,c(1,6:10)], LITDIA_Normal_5_filter[,c(1,6:10)],
@@ -971,7 +965,6 @@ OT_in_LIT_plot <- OT_in_LIT %>%
        title = "D")+
   theme(axis.text.x = element_text(angle = 90,
                                    vjust = 0.3),
-        panel.grid = element_blank(),
         legend.position = c(0.915, 0.927),
         legend.background = element_blank(),
         axis.title = element_text(size = 27),
@@ -1247,7 +1240,7 @@ upset_100ng
 #7k
 OTDIA_7k_1_filter$in_LIT <- 
   OTDIA_7k_1_filter$PEP.StrippedSequence %in%
-  LITDIA_Turbo_1_auto_filter$PEP.StrippedSequence
+  LITDIA_Turbo_1_filter$PEP.StrippedSequence
 OTDIA_7k_1_filter$method <- "7k"
 
 #15k
@@ -1274,7 +1267,7 @@ OTDIA_7k_1_filter$input <-
 #7k
 OTDIA_7k_100_filter$in_LIT <- 
   OTDIA_7k_100_filter$PEP.StrippedSequence %in%
-  LITDIA_Turbo_100_auto_filter$PEP.StrippedSequence
+  LITDIA_Turbo_100_filter$PEP.StrippedSequence
 OTDIA_7k_100_filter$method <- "7k"
 
 #15k
@@ -1413,10 +1406,10 @@ For 100 ng, OT yields a higher number of peptides, regardless of the abundance b
 
 ```{r}
 Turbo_pep_list <- 
-  list('Turbo 1 ng' = LITDIA_Turbo_1_auto_filter$PEP.StrippedSequence,
-       'Turbo 5 ng' = LITDIA_Turbo_5_auto_filter$PEP.StrippedSequence,
-       'Turbo 10 ng' = LITDIA_Turbo_10_auto_filter$PEP.StrippedSequence,
-       'Turbo 100 ng' = LITDIA_Turbo_100_auto_filter$PEP.StrippedSequence)
+  list('Turbo 1 ng' = LITDIA_Turbo_1_filter$PEP.StrippedSequence,
+       'Turbo 5 ng' = LITDIA_Turbo_5_filter$PEP.StrippedSequence,
+       'Turbo 10 ng' = LITDIA_Turbo_10_filter$PEP.StrippedSequence,
+       'Turbo 100 ng' = LITDIA_Turbo_100_filter$PEP.StrippedSequence)
 
 upset(fromList(Turbo_pep_list),
       sets = c('Turbo 100 ng', 'Turbo 10 ng', 'Turbo 5 ng', 'Turbo 1 ng'),
@@ -1438,7 +1431,7 @@ upset(fromList(Turbo_pep_list),
 
 LITDIA_Turbo auto
 ```{r}
-LITDIA_Turbo_1_auto_CV <- LITDIA_Turbo_1_auto[,1:5] %>% 
+LITDIA_Turbo_1_CV <- LITDIA_Turbo_1[,1:5] %>% 
   pivot_longer(names_to = "Sample", 
                values_to = "Quantity", 
                -PEP.StrippedSequence) %>% 
@@ -1524,7 +1517,7 @@ OTDIA_30k_1_CV <- OTDIA_30k_1[,1:5] %>%
 
 LITDIA_Turbo auto
 ```{r}
-LITDIA_Turbo_5_auto_CV <- LITDIA_Turbo_5_auto[,1:5] %>% 
+LITDIA_Turbo_5_CV <- LITDIA_Turbo_5[,1:5] %>% 
   pivot_longer(names_to = "Sample", 
                values_to = "Quantity", 
                -PEP.StrippedSequence) %>% 
@@ -1610,7 +1603,7 @@ OTDIA_30k_5_CV <- OTDIA_30k_5[,1:5] %>%
 
 LITDIA_Turbo auto
 ```{r}
-LITDIA_Turbo_10_auto_CV <- LITDIA_Turbo_10_auto[,1:5] %>% 
+LITDIA_Turbo_10_CV <- LITDIA_Turbo_10[,1:5] %>% 
   pivot_longer(names_to = "Sample", 
                values_to = "Quantity", 
                -PEP.StrippedSequence) %>% 
@@ -1696,7 +1689,7 @@ OTDIA_30k_10_CV <- OTDIA_30k_10[,1:5] %>%
 
 LITDIA_Turbo
 ```{r}
-LITDIA_Turbo_100_auto_CV <- LITDIA_Turbo_100_auto[,1:5] %>% 
+LITDIA_Turbo_100_CV <- LITDIA_Turbo_100[,1:5] %>% 
   pivot_longer(names_to = "Sample", 
                values_to = "Quantity", 
                -PEP.StrippedSequence) %>% 
@@ -1782,13 +1775,13 @@ OTDIA_30k_100_CV <- OTDIA_30k_100[,1:5] %>%
 
 ```{r}
 CV_joined <- 
-  rbind(LITDIA_Turbo_1_auto_CV, LITDIA_Rapid_1_CV, LITDIA_Normal_1_CV,
+  rbind(LITDIA_Turbo_1_CV, LITDIA_Rapid_1_CV, LITDIA_Normal_1_CV,
       OTDIA_7k_1_CV, OTDIA_15k_1_CV, OTDIA_30k_1_CV,
-      LITDIA_Turbo_5_auto_CV, LITDIA_Rapid_5_CV, LITDIA_Normal_5_CV,
+      LITDIA_Turbo_5_CV, LITDIA_Rapid_5_CV, LITDIA_Normal_5_CV,
       OTDIA_7k_5_CV, OTDIA_15k_5_CV, OTDIA_30k_5_CV,
-      LITDIA_Turbo_10_auto_CV, LITDIA_Rapid_10_CV, LITDIA_Normal_10_CV,
+      LITDIA_Turbo_10_CV, LITDIA_Rapid_10_CV, LITDIA_Normal_10_CV,
       OTDIA_7k_10_CV, OTDIA_15k_10_CV, OTDIA_30k_10_CV,
-      LITDIA_Turbo_100_auto_CV, LITDIA_Rapid_100_CV, LITDIA_Normal_100_CV,
+      LITDIA_Turbo_100_CV, LITDIA_Rapid_100_CV, LITDIA_Normal_100_CV,
       OTDIA_7k_100_CV, OTDIA_15k_100_CV, OTDIA_30k_100_CV)
 
 CV_joined$input <- factor(CV_joined$input, levels = unique(CV_joined$input))
@@ -1802,21 +1795,6 @@ CV_joined$method <- factor(CV_joined$method, levels = unique(CV_joined$method))
 CV_joined$indiv <- paste(CV_joined$method, CV_joined$input, sep = " ")
 CV_joined$method %>% table()
 
-lim <- 
-  c(boxplot.stats(log10(CV_joined[CV_joined$method ==
-                                    "LITDIA_Turbo",]$CV*100))$stats[c(1,5)],
-    boxplot.stats(log10(CV_joined[CV_joined$method ==
-                                    "LITDIA_Rapid",]$CV*100))$stats[c(1,5)],
-    boxplot.stats(log10(CV_joined[CV_joined$method ==
-                                    "LITDIA_Normal",]$CV*100))$stats[c(1,5)],
-    boxplot.stats(log10(CV_joined[CV_joined$method ==
-                                    "OTDIA_7k",]$CV*100))$stats[c(1,5)],
-    boxplot.stats(log10(CV_joined[CV_joined$method ==
-                                    "OTDIA_15k",]$CV*100))$stats[c(1,5)],
-    boxplot.stats(log10(CV_joined[CV_joined$method ==
-                                    "OTDIA_30k",]$CV*100))$stats[c(1,5)])
-lim <- c(min(lim), max(lim))  
-
 CV_plot <- CV_joined %>% 
   ggplot(aes(x = as.factor(input), 
              y = CV*100, 
@@ -1826,7 +1804,6 @@ CV_plot <- CV_joined %>%
                size = 0.9)+
   scale_fill_manual(values = c(rep(teera_palette[c(1: 4)], 3),
                                rep(teera_palette[c(5: 8)], 3))) +
-  scale_y_log10(breaks = c(1, 20, 100))+
   geom_hline(yintercept = 20,
              linetype = "dashed",
              size = 0.8)+
@@ -1834,7 +1811,6 @@ CV_plot <- CV_joined %>%
        y = "CV (%)",
        title = "B")+
   theme(legend.position = "none",
-        panel.grid = element_blank(),
         axis.title = element_text(size = 27),
         axis.text = element_text(size = 24),
         axis.text.x = element_text(angle = 90, vjust = 0.3, hjust = 1),
@@ -1849,14 +1825,19 @@ CV_plot <- CV_joined %>%
       "OTDIA_7k" = "OT 7.5k",
       "OTDIA_15k" = "OT 15k",
       "OTDIA_30k" = "OT 30k")))+
-  coord_cartesian(ylim = 10^(lim))
+  coord_cartesian(ylim = c(0.03, 87))
 
 
 CV_plot
+
+CV_joined %>% 
+  filter(input == "1 ng") %>% 
+  group_by(method) %>% 
+  summarise(median_CV = median(CV, na.rm = TRUE))
 ```
 
 ```{r}
-inner_join(LITDIA_Turbo_1_auto_CV[, c(1, 4)],
+inner_join(LITDIA_Turbo_1_CV[, c(1, 4)],
            OTDIA_7k_1_CV[, c(1, 4)],
            by = "PEP.StrippedSequence") %>% 
   mutate(LIT_OT_ratio = log10(CV.x/CV.y)) %>% 
@@ -1892,7 +1873,7 @@ sum(!is.na(LITDIA_Turbo_1[, 3]))
 sum(!is.na(LITDIA_Turbo_1[, 4]))
 sum(!is.na(LITDIA_Turbo_1[, 5]))
 
-id_LITDIA_Turbo_1_auto <- id_LITDIA_Turbo_5_auto <- id_LITDIA_Turbo_10_auto <- id_LITDIA_Turbo_100_auto <- 
+id_LITDIA_Turbo_1 <- id_LITDIA_Turbo_5 <- id_LITDIA_Turbo_10 <- id_LITDIA_Turbo_100 <- 
   id_LITDIA_Rapid_1 <- id_LITDIA_Rapid_5 <- id_LITDIA_Rapid_10 <- id_LITDIA_Rapid_100 <-
   id_LITDIA_Normal_1 <- id_LITDIA_Normal_5 <- id_LITDIA_Normal_10 <- id_LITDIA_Normal_100 <-  
   id_OTDIA_7k_1 <- id_OTDIA_7k_5 <- id_OTDIA_7k_10 <- id_OTDIA_7k_100 <- 
@@ -1922,7 +1903,7 @@ for(i in 2:5){
 LIT Turbo DIA auto
 ```{r}
 for(i in 2:5){
-id_LITDIA_Turbo_1_auto[i-1] <- sum(!is.na(LITDIA_Turbo_1_auto[, i]))}
+id_LITDIA_Turbo_1[i-1] <- sum(!is.na(LITDIA_Turbo_1[, i]))}
 ```
 
 LIT Rapid DIA
@@ -1960,7 +1941,7 @@ for(i in 2:5){
 LIT Turbo DIA auto
 ```{r}
 for(i in 2:5){
-id_LITDIA_Turbo_5_auto[i-1] <- sum(!is.na(LITDIA_Turbo_5_auto[, i]))}
+id_LITDIA_Turbo_5[i-1] <- sum(!is.na(LITDIA_Turbo_5[, i]))}
 ```
 
 LIT Rapid DIA
@@ -1998,7 +1979,7 @@ for(i in 2:5){
 LIT Turbo DIA auto
 ```{r}
 for(i in 2:5){
-id_LITDIA_Turbo_10_auto[i-1] <- sum(!is.na(LITDIA_Turbo_10_auto[, i]))}
+id_LITDIA_Turbo_10[i-1] <- sum(!is.na(LITDIA_Turbo_10[, i]))}
 ```
 
 LIT Rapid DIA
@@ -2036,7 +2017,7 @@ for(i in 2:5){
 LIT Turbo DIA auto
 ```{r}
 for(i in 2:5){
-id_LITDIA_Turbo_100_auto[i-1] <- sum(!is.na(LITDIA_Turbo_100_auto[, i]))}
+id_LITDIA_Turbo_100[i-1] <- sum(!is.na(LITDIA_Turbo_100[, i]))}
 ```
 
 LIT Rapid DIA
@@ -2058,13 +2039,13 @@ id_pep <- data.frame(method = rep(c(rep("OT 7.5k", 4), rep("OT 15k", 4), rep("OT
                                     rep("LIT Turbo", 4), rep("LIT Rapid", 4), rep("LIT Normal", 4)), 4),
            replicate = rep(1:4, 24),
            id = c(id_OTDIA_7k_1, id_OTDIA_15k_1, id_OTDIA_30k_1, 
-                  id_LITDIA_Turbo_1_auto, id_LITDIA_Rapid_1, id_LITDIA_Normal_1,
+                  id_LITDIA_Turbo_1, id_LITDIA_Rapid_1, id_LITDIA_Normal_1,
                   id_OTDIA_7k_5, id_OTDIA_15k_5, id_OTDIA_30k_5, 
-                  id_LITDIA_Turbo_5_auto, id_LITDIA_Rapid_5, id_LITDIA_Normal_5,
+                  id_LITDIA_Turbo_5, id_LITDIA_Rapid_5, id_LITDIA_Normal_5,
                   id_OTDIA_7k_10, id_OTDIA_15k_10, id_OTDIA_30k_10, 
-                  id_LITDIA_Turbo_10_auto, id_LITDIA_Rapid_10, id_LITDIA_Normal_10,
+                  id_LITDIA_Turbo_10, id_LITDIA_Rapid_10, id_LITDIA_Normal_10,
                   id_OTDIA_7k_100, id_OTDIA_15k_100, id_OTDIA_30k_100, 
-                  id_LITDIA_Turbo_100_auto, id_LITDIA_Rapid_100, id_LITDIA_Normal_100),
+                  id_LITDIA_Turbo_100, id_LITDIA_Rapid_100, id_LITDIA_Normal_100),
            input = c(rep("1 ng", 24), rep("5 ng", 24), rep("10 ng", 24), rep("100 ng", 24)))
 
 id_pep$method <- factor(id_pep$method, levels = unique(id_pep$method))
@@ -2079,7 +2060,7 @@ id_plot <- id_pep %>%
   summarise(mean_id = mean(id),
             sd_id = sd(id))%>%
   ggplot(aes(x = input, y = mean_id, group = method, color = method))+
-  theme_classic2()+
+  theme_bw()+
   geom_line(size = 2.5)+
   geom_point(size = 4)+
   scale_color_manual(values = c("#ADC2E8", "#7F9FDB", "#527DCE", "#EEB9CF", "#DF7FA7", "#D35087"))+
@@ -2124,6 +2105,226 @@ id_pep %>%
   theme(legend.position = c(0.15, 0.74),
         legend.background = element_blank())
 ```
+
+ 
+
+## Stacked plot
+
+```{r}
+compute_CV <- function(x){
+  y <- x %>% 
+    mutate(sd = apply(x[, 2:(ncol(x)-2)],
+                      FUN = sd, MARGIN =  1, na.rm = TRUE),
+           CV = sd/mean_quantity)
+  colnames(y)[2:(ncol(x)-2)] <- paste0("S", 1:(ncol(x)-3))
+  if(ncol(x) <= 6){
+  y$S4 <- NA
+ }
+  return(y)
+}
+```
+
+### 1 ng
+
+LIT
+```{r}
+LITDIA_Turbo_1_CV <- compute_CV(LITDIA_Turbo_1)
+LITDIA_Turbo_1_CV$method <- "LIT Turbo"
+LITDIA_Turbo_1_CV$input<- "1 ng"
+
+LITDIA_Rapid_1_CV <- compute_CV(LITDIA_Rapid_1)
+LITDIA_Rapid_1_CV$method <- "LIT Rapid"
+LITDIA_Rapid_1_CV$input<- "1 ng"
+
+LITDIA_Normal_1_CV <- compute_CV(LITDIA_Normal_1)
+LITDIA_Normal_1_CV$method <- "LIT Normal"
+LITDIA_Normal_1_CV$input<- "1 ng"
+```
+
+OT
+```{r}
+OTDIA_7k_1_CV <- compute_CV(OTDIA_7k_1)
+OTDIA_7k_1_CV$method <- "OT 7k"
+OTDIA_7k_1_CV$input<- "1 ng"
+
+OTDIA_15k_1_CV <- compute_CV(OTDIA_15k_1)
+OTDIA_15k_1_CV$method <- "OT 15k"
+OTDIA_15k_1_CV$input<- "1 ng"
+
+OTDIA_30k_1_CV <- compute_CV(OTDIA_30k_1)
+OTDIA_30k_1_CV$method <- "OT 30k"
+OTDIA_30k_1_CV$input<- "1 ng"
+```
+
+### 5 ng
+
+LIT
+```{r}
+LITDIA_Turbo_5_CV <- compute_CV(LITDIA_Turbo_5)
+LITDIA_Turbo_5_CV$method <- "LIT Turbo"
+LITDIA_Turbo_5_CV$input<- "5 ng"
+
+LITDIA_Rapid_5_CV <- compute_CV(LITDIA_Rapid_5)
+LITDIA_Rapid_5_CV$method <- "LIT Rapid"
+LITDIA_Rapid_5_CV$input<- "5 ng"
+
+LITDIA_Normal_5_CV <- compute_CV(LITDIA_Normal_5)
+LITDIA_Normal_5_CV$method <- "LIT Normal"
+LITDIA_Normal_5_CV$input<- "5 ng"
+```
+
+OT
+```{r}
+OTDIA_7k_5_CV <- compute_CV(OTDIA_7k_5)
+OTDIA_7k_5_CV$method <- "OT 7k"
+OTDIA_7k_5_CV$input<- "5 ng"
+
+OTDIA_15k_5_CV <- compute_CV(OTDIA_15k_5)
+OTDIA_15k_5_CV$method <- "OT 15k"
+OTDIA_15k_5_CV$input<- "5 ng"
+
+OTDIA_30k_5_CV <- compute_CV(OTDIA_30k_5)
+OTDIA_30k_5_CV$method <- "OT 30k"
+OTDIA_30k_5_CV$input<- "5 ng"
+```
+
+### 10 ng
+
+LIT
+```{r}
+LITDIA_Turbo_10_CV <- compute_CV(LITDIA_Turbo_10)
+LITDIA_Turbo_10_CV$method <- "LIT Turbo"
+LITDIA_Turbo_10_CV$input<- "10 ng"
+
+LITDIA_Rapid_10_CV <- compute_CV(LITDIA_Rapid_10)
+LITDIA_Rapid_10_CV$method <- "LIT Rapid"
+LITDIA_Rapid_10_CV$input<- "10 ng"
+
+LITDIA_Normal_10_CV <- compute_CV(LITDIA_Normal_10)
+LITDIA_Normal_10_CV$method <- "LIT Normal"
+LITDIA_Normal_10_CV$input<- "10 ng"
+```
+
+OT
+```{r}
+OTDIA_7k_10_CV <- compute_CV(OTDIA_7k_10)
+OTDIA_7k_10_CV$method <- "OT 7k"
+OTDIA_7k_10_CV$input<- "10 ng"
+
+OTDIA_15k_10_CV <- compute_CV(OTDIA_15k_10)
+OTDIA_15k_10_CV$method <- "OT 15k"
+OTDIA_15k_10_CV$input<- "10 ng"
+
+OTDIA_30k_10_CV <- compute_CV(OTDIA_30k_10)
+OTDIA_30k_10_CV$method <- "OT 30k"
+OTDIA_30k_10_CV$input<- "10 ng"
+```
+
+### 100 ng
+
+LIT
+```{r}
+LITDIA_Turbo_100_CV <- compute_CV(LITDIA_Turbo_100)
+LITDIA_Turbo_100_CV$method <- "LIT Turbo"
+LITDIA_Turbo_100_CV$input<- "100 ng"
+
+LITDIA_Rapid_100_CV <- compute_CV(LITDIA_Rapid_100)
+LITDIA_Rapid_100_CV$method <- "LIT Rapid"
+LITDIA_Rapid_100_CV$input<- "100 ng"
+
+LITDIA_Normal_100_CV <- compute_CV(LITDIA_Normal_100)
+LITDIA_Normal_100_CV$method <- "LIT Normal"
+LITDIA_Normal_100_CV$input<- "100 ng"
+```
+
+OT
+```{r}
+OTDIA_7k_100_CV <- compute_CV(OTDIA_7k_100)
+OTDIA_7k_100_CV$method <- "OT 7k"
+OTDIA_7k_100_CV$input<- "100 ng"
+
+OTDIA_15k_100_CV <- compute_CV(OTDIA_15k_100)
+OTDIA_15k_100_CV$method <- "OT 15k"
+OTDIA_15k_100_CV$input<- "100 ng"
+
+OTDIA_30k_100_CV <- compute_CV(OTDIA_30k_100)
+OTDIA_30k_100_CV$method <- "OT 30k"
+OTDIA_30k_100_CV$input<- "100 ng"
+```
+
+### Join and count id
+
+```{r}
+CV_joined <- 
+  rbind(LITDIA_Turbo_1_CV, LITDIA_Rapid_1_CV, LITDIA_Normal_1_CV,
+      OTDIA_7k_1_CV, OTDIA_15k_1_CV, OTDIA_30k_1_CV,
+      LITDIA_Turbo_5_CV, LITDIA_Rapid_5_CV, LITDIA_Normal_5_CV,
+      OTDIA_7k_5_CV, OTDIA_15k_5_CV, OTDIA_30k_5_CV,
+      LITDIA_Turbo_10_CV, LITDIA_Rapid_10_CV, LITDIA_Normal_10_CV,
+      OTDIA_7k_10_CV, OTDIA_15k_10_CV, OTDIA_30k_10_CV,
+      LITDIA_Turbo_100_CV, LITDIA_Rapid_100_CV, LITDIA_Normal_100_CV,
+      OTDIA_7k_100_CV, OTDIA_15k_100_CV, OTDIA_30k_100_CV)
+CV_joined$method %>% table()
+CV_joined$input %>% table()
+
+CV_joined$method <- factor(CV_joined$method, 
+                          levels = unique(CV_joined$method))
+
+CV_joined$input <- factor(CV_joined$input, 
+                          levels = unique(CV_joined$input))
+
+CV_joined$CV_filter <- CV_joined$CV <= 0.1
+
+CV_joined$CV <= 0.1
+
+CV_joined <- CV_joined %>%
+  filter(!is.na(CV_filter)) %>% 
+  group_by(method, input, CV_filter) %>% 
+  summarise(id_S1 = sum(!is.na(S1)),
+            id_S2 = sum(!is.na(S2)),
+            id_S3 = sum(!is.na(S3)),
+            id_S4 = sum(!is.na(S4)))
+
+CV_joined$mean_id <- rowMeans(CV_joined[4:7], na.rm = TRUE)
+CV_joined$sd_id <- apply(CV_joined[4:7], FUN =  sd, MARGIN = 1, na.rm = TRUE)
+```
+
+### plot 
+
+```{r}
+CV_joined$y_errorbar <- CV_joined$mean_id
+CV_joined$y_errorbar[CV_joined$CV_filter == FALSE] <- 
+  CV_joined$y_errorbar[CV_joined$CV_filter == FALSE] +
+  CV_joined$y_errorbar[CV_joined$CV_filter == TRUE]
+
+stacked_plot <- CV_joined %>% 
+  ggplot(aes(x = input, y = mean_id, fill = CV_filter))+
+  geom_col(width = 0.7) +
+  facet_wrap(~method) +
+  labs(x = "Input Time",
+       y = "Identidied peptides",
+       fill = "CV") +
+  theme(axis.text = element_text(size = 24),
+        axis.title = element_text(size = 27),
+        strip.text = element_text(size = 27),
+        strip.background = element_rect(fill = "#E5E4F7"),
+        panel.grid = element_blank(),
+        axis.title.y = element_text(vjust = 2.2),
+        axis.text.x = element_text(angle = 90, vjust = 0.3, hjust = 1),
+        legend.title = element_text(size = 27),
+        legend.text = element_text(size = 22),
+        legend.key.size = unit(0.9, "cm"))+
+  scale_fill_manual(values = c("grey82", "#ff3030"),
+                    labels = c("> 20%", "< or = 20%"))+
+  scale_y_continuous(limits = c(0, 18000))+
+  geom_errorbar(aes(ymin = y_errorbar - sd_id, 
+                         ymax = y_errorbar + sd_id),
+                    width = 0.2,
+                    size = 1)
+
+stacked_plot
+```
+
 
 # Figure 1
 
@@ -2579,7 +2780,7 @@ plot_20SPD <- pp %>%
         strip.background = element_rect(fill = "#E5E4F7"),
         plot.margin = margin(t = 15,  
                              r = 50,
-                             b = 40,
+                             b = 10,
                              l = 10))
 
 limit <- 10^c(min(c(layer_scales(plot_40SPD)$y$get_limits(), 
@@ -2596,8 +2797,81 @@ pp_plot <- (plot_40SPD +
   (plot_20SPD + 
      scale_y_log10(limits = limit,
                    breaks = c(3, 6, 10, 30))+
-     theme(axis.title.y = element_text(hjust = -2.5, vjust = 1)))
+     theme(axis.title.y = element_text(hjust = -1.8, vjust = 1)))
 pp_plot
+```
+
+## Total number of precursors
+
+```{r}
+id_prec_40SPD <- pp %>% 
+  group_by(indiv, IT, input, method) %>% 
+  summarise(n_prec = sum(!is.na(Points_per_Peaks))) %>% 
+  filter(IT == "40 SPD" &
+           input != "100 ng") %>% 
+  ggplot(aes(x = input, y = n_prec/4, group = method, color = method)) +
+  geom_line(size = 2.5) +
+  geom_point(size = 4) +
+  theme_classic2() +
+  scale_color_manual(values = c("#d3c582FF", "#6FB382FF", "#92BBD9FF"))+
+  labs(color = "Scanning method",
+       x = "Input",
+       title = "B")+
+  theme(legend.position = c(0.148, 0.85),
+        legend.background = element_blank(),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 22),
+        axis.text = element_text(size = 24),
+        axis.title = element_text(size = 27),
+        legend.key.size = unit(0.9, "cm"),
+        axis.title.y = element_blank(),
+        plot.margin = margin(t = 0,  
+                             r = 58,
+                             b = 54,
+                             l = 10),
+        plot.title = element_text(size = 32, face = "bold",
+                                  hjust = -0.37))+  
+  annotate("text", x = 3.5, y = 7500, label = "40 SPD", angle = -90, size = 9.5)
+
+id_prec_20SPD <- pp %>% 
+  group_by(indiv, IT, input, method) %>% 
+  summarise(n_prec = sum(!is.na(Points_per_Peaks))) %>% 
+  filter(IT == "20 SPD"&
+           input != "100 ng") %>% 
+  ggplot(aes(x = input, y = n_prec/4, group = method, color = method)) +
+  geom_line(size = 2.5) +
+  geom_point(size = 4) +
+  theme_classic2() +
+  scale_color_manual(values = c("#6FB382FF", "#92BBD9FF", "#4D6D93FF")) +
+  labs(color = "Scanning method",
+       x = "Input",
+       y = "Total precursors number")+
+  theme(legend.position = c(0.18, 0.85),
+        legend.background = element_blank(),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 22),
+        axis.text = element_text(size = 24),
+        axis.title = element_text(size = 27),
+        legend.key.size = unit(0.9, "cm"),
+        axis.title.y = element_text(hjust = 0.2,
+                                    vjust = 2.4),
+        plot.margin = margin(t = 15,
+                             r = 58,
+                             b = 40,
+                             l = 10),
+        axis.text.x = element_text(angle = 90, vjust = 0.3, hjust = 1))+  
+  annotate("text", x = 3.5, y = 7500, label = "20 SPD", angle = -90, size = 9.5)
+
+limit <- c(min(c(layer_scales(id_prec_40SPD)$y$get_limits(), 
+                 layer_scales(id_prec_20SPD)$y$get_limits())),
+max(c(layer_scales(id_prec_40SPD)$y$get_limits(), layer_scales(id_prec_20SPD)$y$get_limits())))
+
+id_prec <- (id_prec_40SPD +
+             scale_y_continuous(limits = limit, breaks = c(2500, 7500, 12500))+
+            theme(axis.title.x = element_blank(),
+                  axis.text.x = element_blank()))/ 
+(id_prec_20SPD +
+   scale_y_continuous(limits = limit, breaks = c(2500, 7500, 12500)))
 ```
 
 ## PPP >= 6
@@ -2610,7 +2884,7 @@ id_acc_40SPD <- pp %>%
   summarise(n_acc = sum(acc)) %>% 
   filter(IT == "40 SPD" &
            input != "100 ng") %>% 
-  ggplot(aes(x = input, y = n_acc/3, group = method, color = method)) +
+  ggplot(aes(x = input, y = n_acc/4, group = method, color = method)) +
   geom_line(size = 2.5) +
   geom_point(size = 4) +
   theme_classic2() +
@@ -2639,14 +2913,14 @@ id_acc_20SPD <- pp %>%
   summarise(n_acc = sum(acc)) %>% 
   filter(IT == "20 SPD"&
            input != "100 ng") %>% 
-  ggplot(aes(x = input, y = n_acc/3, group = method, color = method)) +
+  ggplot(aes(x = input, y = n_acc/4, group = method, color = method)) +
   geom_line(size = 2.5) +
   geom_point(size = 4) +
   theme_classic2() +
   scale_color_manual(values = c("#6FB382FF", "#92BBD9FF", "#4D6D93FF")) +
   labs(color = "Scanning method",
        x = "Input",
-       y = "Peptides with number of points across a peak >= 6")+
+       y = "Precursors with points across a peak >= 6")+
   theme(legend.position = c(0.18, 0.85),
         legend.background = element_blank(),
         legend.title = element_blank(),
@@ -2675,6 +2949,92 @@ id_acc <- (id_acc_40SPD +
    scale_y_continuous(limits = limit, breaks = c(2500, 7500, 12500)))
 ```
 
+```{r}
+wrap_plots(id_prec,id_acc)
+```
+
+```{r}
+temp1 <- pp %>% 
+  group_by(indiv, IT, input, method) %>% 
+  summarise(n_prec = sum(!is.na(Points_per_Peaks)))
+
+temp2 <- pp %>% 
+  group_by(indiv, IT, input, method) %>% 
+  summarise(n_acc = sum(acc))
+
+temp1$Precursors <- "Total precursors"
+temp2$Precursors <- "Points across a peak >= 6"
+
+colnames(temp1)[5] <- "n"
+colnames(temp2)[5] <- "n"
+
+temp1$n <- temp1$n - temp2$n
+
+temp <- rbind(temp2, temp1)
+
+temp$Precursors <- factor(temp$Precursors, 
+                         levels = c("Total precursors", "Points across a peak >= 6"))
+
+
+id_pr_40SPD <- temp %>% 
+  filter(input != "100 ng" & IT == "40 SPD" ) %>% 
+  ggplot(aes(x = method, y = n/4, fill = Precursors, group = method)) +
+  geom_col() +
+  theme_bw() +
+  facet_grid(IT ~ input) +
+  labs(x = "Scanning mode",
+       y = "Precursors number",
+       title = "B")+
+  scale_fill_manual(values = c("grey82", "#ff3030"))+
+  theme(plot.title = element_text(size = 32, face = "bold",
+                                  hjust = -0.095),
+        panel.grid = element_blank(),
+        axis.title = element_blank(),
+        axis.text = element_text(size = 24),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        strip.text = element_text(size = 27),
+        strip.background = element_rect(fill = "#E5E4F7"),
+        legend.title = element_text(size = 27, vjust = 1.3),
+        legend.text = element_text(size = 22),
+        legend.position = "top")
+
+id_pr_20SPD <- temp %>% 
+  filter(input != "100 ng" & IT == "20 SPD" ) %>% 
+  ggplot(aes(x = method , y = n/4, fill = Precursors, group = method)) +
+  geom_col() +
+  theme_bw() +
+  facet_grid(IT ~ input) +
+  labs(x = "Scanning mode",
+       y = "Precursors number")+
+  scale_fill_manual(values = c("grey82", "#ff3030"))+
+  theme(panel.grid = element_blank(),
+        axis.title = element_text(size = 27),
+        axis.text = element_text(size = 24),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        strip.text = element_text(size = 27),
+        strip.background.x = element_blank(),
+        strip.background = element_rect(fill = "#E5E4F7"),
+        strip.text.x = element_blank(),
+        axis.title.x = element_text(vjust = -1),
+        legend.position = "none")
+
+limit <- c(min(c(layer_scales(id_pr_40SPD)$y$get_limits(),
+                 layer_scales(id_pr_20SPD)$y$get_limits())),
+           max(c(layer_scales(id_pr_40SPD)$y$get_limits(),
+                 layer_scales(id_pr_20SPD)$y$get_limits()))+500)
+
+id_pr_plot <-
+ (id_pr_40SPD +
+    theme(axis.title = element_blank())+
+    scale_y_continuous(limits = limit))/
+ (id_pr_20SPD +
+    theme(axis.title.y = element_text(hjust = -2.15,
+                                      vjust = 3.5))+
+    scale_y_continuous(limits = limit))
+```
+
+
+
 ## Figure 4
 
 ```{r}
@@ -2686,6 +3046,10 @@ id_acc <- (id_acc_40SPD +
    scale_y_continuous(limits = limit, breaks = c(2500, 7500, 12500)))
 
 wrap_plots(pp_plot, id_acc)+ plot_layout(widths = c(1.7, 1))
+```
+
+```{r}
+wrap_plots(pp_plot,id_pr_plot, nrow = 2)
 ```
 
 
@@ -2705,7 +3069,7 @@ LITDIA_Rapid_40SPD_31ms_34w_1 <- read.csv2(paste0(lit_path, "20220509_LIT_Rapid_
 LITDIA_Rapid_40SPD_31ms_25w_1 <- read.csv2(paste0(lit_path, "20220509_LIT_Rapid_DIA_1ng_40SPD_whisper100_1CV_31ms_25w.csv"))
 
 #30ms 30w
-LITDIA_Rapid_40SPD_30ms_3Ow_1 <- read.csv2(paste0(lit_path, "20220509_LIT_Rapid_DIA_1ng_40SPD_whisper100_1CV_30ms_30w.csv"))
+LITDIA_Rapid_40SPD_30ms_30w_1 <- read.csv2(paste0(lit_path, "20220509_LIT_Rapid_DIA_1ng_40SPD_whisper100_1CV_30ms_30w.csv"))
 ```
 
 20 SPD
@@ -2727,7 +3091,7 @@ LITDIA_Normal_20SPD_38ms_40w_1 <- read.csv2(paste0(lit_path, "20220509_LIT_Norma
 LITDIA_Rapid_40SPD_23ms_40w_1 <- filter_pep(LITDIA_Rapid_40SPD_23ms_40w_1)
 LITDIA_Rapid_40SPD_31ms_34w_1 <- filter_pep(LITDIA_Rapid_40SPD_31ms_34w_1)
 LITDIA_Rapid_40SPD_31ms_25w_1 <- filter_pep(LITDIA_Rapid_40SPD_31ms_25w_1)
-LITDIA_Rapid_40SPD_30ms_3Ow_1 <- filter_pep(LITDIA_Rapid_40SPD_30ms_3Ow_1)
+LITDIA_Rapid_40SPD_30ms_30w_1 <- filter_pep(LITDIA_Rapid_40SPD_30ms_30w_1)
 ```
 
 20 SPD
@@ -2741,7 +3105,7 @@ LITDIA_Normal_20SPD_38ms_40w_1 <- filter_pep(LITDIA_Normal_20SPD_38ms_40w_1)
 
 ```{r}
 id_LITDIA_Rapid_40SPD_23ms_40w_1 <- id_LITDIA_Rapid_40SPD_31ms_34w_1 <- 
-  id_LITDIA_Rapid_40SPD_31ms_25w_1 <- id_LITDIA_Rapid_40SPD_30ms_3Ow_1 <-
+  id_LITDIA_Rapid_40SPD_31ms_25w_1 <- id_LITDIA_Rapid_40SPD_30ms_30w_1 <-
   id_LITDIA_Normal_20SPD_76ms_20w_1 <- id_LITDIA_Normal_20SPD_50ms_30w_1 <-
   id_LITDIA_Normal_20SPD_38ms_40w_1 <- rep(NA, 4)
 ```
@@ -2766,8 +3130,8 @@ for(i in 2:(ncol(LITDIA_Rapid_40SPD_31ms_25w_1)-2)){
 
 30ms 30w
 ```{r}
-for(i in 2:(ncol(LITDIA_Rapid_40SPD_30ms_3Ow_1)-2)){
-  id_LITDIA_Rapid_40SPD_30ms_3Ow_1[i-1] <- sum(!is.na(LITDIA_Rapid_40SPD_30ms_3Ow_1[, i]))}
+for(i in 2:(ncol(LITDIA_Rapid_40SPD_30ms_30w_1)-2)){
+  id_LITDIA_Rapid_40SPD_30ms_30w_1[i-1] <- sum(!is.na(LITDIA_Rapid_40SPD_30ms_30w_1[, i]))}
 ```
 
 ### 20 SPD
@@ -2801,7 +3165,7 @@ id_it <-
              SPD = c(rep("40 SPD", 16), rep("20 SPD", 12)),
              replicate = rep(1:4, 7),
              id = c(id_LITDIA_Rapid_40SPD_23ms_40w_1, id_LITDIA_Rapid_40SPD_31ms_34w_1,
-                    id_LITDIA_Rapid_40SPD_31ms_25w_1, id_LITDIA_Rapid_40SPD_30ms_3Ow_1,
+                    id_LITDIA_Rapid_40SPD_31ms_25w_1, id_LITDIA_Rapid_40SPD_30ms_30w_1,
                     id_LITDIA_Normal_20SPD_76ms_20w_1, id_LITDIA_Normal_20SPD_50ms_30w_1,
                     id_LITDIA_Normal_20SPD_38ms_40w_1))
 id_it$method <- paste(id_it$IT, id_it$windows, sep = " ")
@@ -2941,9 +3305,9 @@ LITDIA_Rapid_40SPD_31ms_25w_1_CV <- LITDIA_Rapid_40SPD_31ms_25w_1[,1:5] %>%
          SPD = "40 SPD")
 ```
 
-LITDIA_Rapid_40SPD_30ms_3Ow_1
+LITDIA_Rapid_40SPD_30ms_30w_1
 ```{r}
-LITDIA_Rapid_40SPD_30ms_3Ow_1_CV <- LITDIA_Rapid_40SPD_30ms_3Ow_1[,1:4] %>% 
+LITDIA_Rapid_40SPD_30ms_30w_1_CV <- LITDIA_Rapid_40SPD_30ms_30w_1[,1:4] %>% 
   pivot_longer(names_to = "Sample", 
                values_to = "Quantity", 
                -PEP.StrippedSequence) %>% 
@@ -3003,7 +3367,7 @@ LITDIA_Normal_20SPD_38ms_40w_1_CV <- LITDIA_Normal_20SPD_38ms_40w_1[,1:4] %>%
 
 ```{r}
 CV_it_joined <- 
-  rbind(LITDIA_Rapid_40SPD_23ms_40w_1_CV, LITDIA_Rapid_40SPD_30ms_3Ow_1_CV, 
+  rbind(LITDIA_Rapid_40SPD_23ms_40w_1_CV, LITDIA_Rapid_40SPD_30ms_30w_1_CV, 
         LITDIA_Rapid_40SPD_31ms_34w_1_CV, LITDIA_Rapid_40SPD_31ms_25w_1_CV,
         LITDIA_Normal_20SPD_38ms_40w_1_CV, LITDIA_Normal_20SPD_50ms_30w_1_CV,
         LITDIA_Normal_20SPD_76ms_20w_1_CV)
@@ -3105,17 +3469,169 @@ CV_it_plot <-
                                       vjust = 2.3)))
 ```
 
+## Stacked plot
+
+### 40 SPD
+
+```{r}
+LITDIA_Rapid_40SPD_23ms_40w_1_CV <- compute_CV(LITDIA_Rapid_40SPD_23ms_40w_1)
+LITDIA_Rapid_40SPD_23ms_40w_1_CV$method <- "23ms_40w"
+LITDIA_Rapid_40SPD_23ms_40w_1_CV$SPD <- "40 SPD"
+
+LITDIA_Rapid_40SPD_31ms_34w_1_CV <- compute_CV(LITDIA_Rapid_40SPD_31ms_34w_1)
+LITDIA_Rapid_40SPD_31ms_34w_1_CV$method <- "31ms_34w"
+LITDIA_Rapid_40SPD_31ms_34w_1_CV$SPD <- "40 SPD"
+
+LITDIA_Rapid_40SPD_31ms_25w_1_CV <- compute_CV(LITDIA_Rapid_40SPD_31ms_25w_1)
+LITDIA_Rapid_40SPD_31ms_25w_1_CV$method <- "31ms_25w"
+LITDIA_Rapid_40SPD_31ms_25w_1_CV$SPD <- "40 SPD"
+
+LITDIA_Rapid_40SPD_30ms_30w_1_CV <- compute_CV(LITDIA_Rapid_40SPD_30ms_30w_1)
+LITDIA_Rapid_40SPD_30ms_30w_1_CV$method <- "30ms_30w"
+LITDIA_Rapid_40SPD_30ms_30w_1_CV$SPD <- "40 SPD"
+```
+
+### 20 SPD
+
+```{r}
+LITDIA_Normal_20SPD_76ms_20w_1_CV <- compute_CV(LITDIA_Normal_20SPD_76ms_20w_1)
+LITDIA_Normal_20SPD_76ms_20w_1_CV$method <- "76ms_20w"
+LITDIA_Normal_20SPD_76ms_20w_1_CV$SPD <- "20 SPD"
+
+LITDIA_Normal_20SPD_50ms_30w_1_CV <- compute_CV(LITDIA_Normal_20SPD_50ms_30w_1)
+LITDIA_Normal_20SPD_50ms_30w_1_CV$method <- "50ms_30w"
+LITDIA_Normal_20SPD_50ms_30w_1_CV$SPD <- "20 SPD"
+
+LITDIA_Normal_20SPD_38ms_40w_1_CV <- compute_CV(LITDIA_Normal_20SPD_38ms_40w_1)
+LITDIA_Normal_20SPD_38ms_40w_1_CV$method <- "38ms_40w"
+LITDIA_Normal_20SPD_38ms_40w_1_CV$SPD <- "20 SPD"
+```
+
+### Join and count id
+
+```{r}
+CV_it_joined <- 
+  rbind(LITDIA_Rapid_40SPD_23ms_40w_1_CV, LITDIA_Rapid_40SPD_30ms_30w_1_CV, 
+        LITDIA_Rapid_40SPD_31ms_34w_1_CV, LITDIA_Rapid_40SPD_31ms_25w_1_CV,
+        LITDIA_Normal_20SPD_38ms_40w_1_CV, LITDIA_Normal_20SPD_50ms_30w_1_CV,
+        LITDIA_Normal_20SPD_76ms_20w_1_CV)
+CV_it_joined$method %>% table()
+
+CV_it_joined$CV_filter <- CV_it_joined$CV <= 0.2
+
+CV_it_joined <- CV_it_joined %>%
+  filter(!is.na(CV_filter)) %>% 
+  group_by(method, CV_filter, SPD) %>% 
+  summarise(id_S1 = sum(!is.na(S1)),
+            id_S2 = sum(!is.na(S2)),
+            id_S3 = sum(!is.na(S3)),
+            id_S4 = sum(!is.na(S4)))
+CV_it_joined$id_S4[CV_it_joined$id_S4 == 0] <- NA
+CV_it_joined$mean_id <- rowMeans(CV_it_joined[4:7], na.rm = TRUE)
+CV_it_joined$sd_id <- apply(CV_it_joined[4:7], FUN =  sd, MARGIN = 1, na.rm = TRUE)
+```
+
+### plot 
+
+```{r}
+CV_it_joined$y_errorbar <- CV_it_joined$mean_id
+CV_it_joined$y_errorbar[CV_it_joined$CV_filter == FALSE] <- 
+  CV_it_joined$y_errorbar[CV_it_joined$CV_filter == FALSE] +
+  CV_it_joined$y_errorbar[CV_it_joined$CV_filter == TRUE]
+
+id_filter_plot_40SPD <- CV_it_joined %>% 
+  filter(method != "31ms_34w" &
+           SPD == "40 SPD") %>% 
+  ggplot(aes(x = method, y = mean_id, fill = CV_filter))+
+  geom_col(width = 0.7)+
+  scale_x_discrete(labels = c("23ms_40w" = "  23ms
+40w",
+                              "30ms_30w" = "  30ms
+30w",
+                              "31ms_25w" = "  31ms
+25w"))+
+  facet_grid(~SPD)+
+  labs(x = "Method",
+       y = "Identidied peptides",
+       fill = "CV < 20%")+
+  theme(axis.text = element_text(size = 24),
+        axis.title = element_text(size = 27),
+        strip.text = element_text(size = 27),
+        strip.background = element_rect(fill = "#E5E4F7"),
+        panel.grid = element_blank(),
+        axis.text.x = element_text(hjust = 0.62),
+        axis.title.y = element_text(vjust = 3.4))+
+  scale_fill_manual(values = c("grey82", "#ff3030"))+
+  geom_errorbar(aes(ymin = y_errorbar - sd_id, 
+                         ymax = y_errorbar + sd_id),
+                    width = 0.2,
+                    size = 1)
+
+id_filter_plot_20SPD <- CV_it_joined %>% 
+  filter(SPD == "20 SPD") %>% 
+  ggplot(aes(x = method, y = mean_id, fill = CV_filter))+
+  geom_col(width = 0.7)+
+  scale_x_discrete(labels = c("38ms_40w" = "  38ms
+40w",
+                              "50ms_30w" = "  50ms
+30w",
+                              "76ms_20w" = "  76ms
+20w"))+
+  facet_grid(~SPD)+
+  labs(x = "Injection Time & Number of Windows",
+       y = "Identidied peptides",
+       fill = "CV")+
+  theme(axis.text = element_text(size = 24),
+        axis.title = element_text(size = 27),
+        strip.text = element_text(size = 27),
+        strip.background = element_rect(fill = "#E5E4F7"),
+        panel.grid = element_blank(),
+        legend.title = element_text(size = 27),
+        legend.text = element_text(size = 22),
+        legend.key.size = unit(0.9, "cm"),
+        axis.text.x = element_text(hjust = 0.62),
+        axis.title.y = element_text(vjust = 3.4))+
+  scale_fill_manual(values = c("grey82", "#ff3030"),
+                    labels = c("> 20%", "< or = 20%"))+
+  geom_errorbar(aes(ymin = y_errorbar - sd_id, 
+                         ymax = y_errorbar + sd_id),
+                    width = 0.2,
+                    size = 1)
+```
+
+```{r}
+limit <- c(min(c(layer_scales(id_filter_plot_40SPD)$y$get_limits(),
+                 layer_scales(id_filter_plot_20SPD)$y$get_limits())),
+           max(c(layer_scales(id_filter_plot_40SPD)$y$get_limits(),
+                 layer_scales(id_filter_plot_20SPD)$y$get_limits()))+500)
+
+id_filter_plot <- 
+  (((id_filter_plot_40SPD + 
+    scale_y_continuous(limits = limit) +
+     theme(axis.title.x = element_blank(),
+           legend.position = 'none')) +
+  (id_filter_plot_20SPD + 
+     scale_y_continuous(limits = limit) +
+    theme(axis.title.x = element_text(hjust = 2.5, vjust = -1),
+           axis.text.y = element_blank(),
+           axis.ticks.y = element_blank(),
+          axis.title.y = element_blank()))))
+
+id_filter_plot
+```
+
+
 ## Figure 3
 
 ```{r}
 wrap_plots(id_it_plot, CV_it_plot)
 ```
 
-# Table
+# Tables
 
 ```{r}
 method_details <- 
-  read.csv("C:/Users/samgr/OneDrive - UCL/Documents/Internship/Data/LITDIA/method_table.csv")
+  read.csv("C:/Users/samgr/OneDrive - UCL/Documents/Internship/Data/LITDIA/Table/method_table.csv")
 colnames(method_details) <- c("Mass Analyzer", "Scanning Mode", "Injection Time (ms)", "Overhead (ms)",
                               "Cycle Time (s)", "Windowing Scheme (m/z)")
 method_details[2:7,] <- method_details[1:6,]
@@ -3133,9 +3649,80 @@ method_details[, -4] %>%
   row_spec(1, bold = TRUE, extra_css = "border-bottom: 3px solid") %>% 
   row_spec(5, bold = TRUE, extra_css = "border-bottom: 3px solid") %>% 
   row_spec(c(1:6))
-
-
 ```
+
+```{r}
+fig_details <- read.csv("C:/Users/samgr/OneDrive - UCL/Documents/Internship/Data/LITDIA/Table/Table.csv")
+
+colnames(fig_details) <- NULL
+
+#table 2.1
+fig_details[1:26,] %>% 
+  kable(caption = "<center><strong>Table 2.1</strong></center>") %>%
+  kable_classic(font_size = 18) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  gsub("font-size: initial !important;",
+       "font-size: 18pt !important;", .) %>%
+  row_spec(1, bold = TRUE, extra_css = "border-top: 3px solid; border-bottom : 3px solid") %>%
+  row_spec(14, bold = TRUE, extra_css = "border-top: 3px solid; border-bottom : 3px solid") 
+
+
+#table 2.2
+temp <- fig_details[27:33,]
+rownames(temp) <- NULL
+temp %>% 
+  kable(caption = "<center><strong>Table 2.2</strong></center>") %>%
+  kable_classic(font_size = 18) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  gsub("font-size: initial !important;",
+       "font-size: 18pt !important;", .) %>%
+  row_spec(1, bold = TRUE, extra_css = "border-top: 3px solid; border-bottom : 3px solid")
+
+#table 2.3
+temp <- fig_details[34:40,]
+rownames(temp) <- NULL
+temp %>% 
+  kable(caption = "<center><strong>Table 2.3</strong></center>") %>%
+  kable_classic(font_size = 18) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  gsub("font-size: initial !important;",
+       "font-size: 18pt !important;", .) %>%
+  row_spec(1, bold = TRUE, extra_css = "border-top: 3px solid; border-bottom : 3px solid")
+
+#table 2.4
+temp <- fig_details[41:45,]
+rownames(temp) <- NULL
+temp %>% 
+  kable(caption = "<center><strong>Table 2.4</strong></center>") %>%
+  kable_classic(font_size = 18) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  gsub("font-size: initial !important;",
+       "font-size: 18pt !important;", .) %>%
+  row_spec(1, bold = TRUE, extra_css = "border-top: 3px solid; border-bottom : 3px solid")
+
+#table 2.5
+temp <- fig_details[46:67,]
+rownames(temp) <- NULL
+temp %>% 
+  kable(caption = "<center><strong>Table 2.5</strong></center>") %>%
+  kable_classic(font_size = 18) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  gsub("font-size: initial !important;",
+       "font-size: 18pt !important;", .) %>%
+  row_spec(1, bold = TRUE, extra_css = "border-top: 3px solid; border-bottom : 3px solid")
+
+#table 2.6
+temp <- fig_details[68:86,]
+rownames(temp) <- NULL
+temp %>% 
+  kable(caption = "<center><strong>Table 2.6</strong></center>") %>%
+  kable_classic(font_size = 18) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  gsub("font-size: initial !important;",
+       "font-size: 18pt !important;", .) %>%
+  row_spec(1, bold = TRUE, extra_css = "border-top: 3px solid; border-bottom : 3px solid")
+```
+
 
 # Heatmap
 
@@ -3144,8 +3731,8 @@ method_details[, -4] %>%
 ```{r, message = TRUE}
 welcome_to_dk <- 
   Reduce(function(...) merge(..., all = TRUE, by = "PEP.StrippedSequence"),
-       list(LITDIA_Turbo_1_auto_filter[,c(1,6)], LITDIA_Turbo_5_auto_filter[,c(1,6)],
-            LITDIA_Turbo_10_auto_filter[,c(1,6)], LITDIA_Turbo_100_auto_filter[,c(1,6)],
+       list(LITDIA_Turbo_1_filter[,c(1,6)], LITDIA_Turbo_5_filter[,c(1,6)],
+            LITDIA_Turbo_10_filter[,c(1,6)], LITDIA_Turbo_100_filter[,c(1,6)],
             LITDIA_Rapid_1_filter[,c(1,6)], LITDIA_Rapid_5_filter[,c(1,6)],
             LITDIA_Rapid_10_filter[,c(1,6)], LITDIA_Rapid_100_filter[,c(1,6)],
             LITDIA_Normal_1_filter[,c(1,6)], LITDIA_Normal_5_filter[,c(1,6)],
@@ -3205,6 +3792,7 @@ pheatmap(cormat,
          cluster_rows = FALSE, 
          cluster_cols = FALSE)
 ```
+
 
 # IT
 
@@ -3267,7 +3855,7 @@ id_IT <-
              replicate = rep(1:4, 4),
              id = c(id_LITDIA_Normal_20SPD_38ms, id_LITDIA_Normal_20SPD_60ms,
                     id_LITDIA_Normal_20SPD_80ms, id_LITDIA_Normal_20SPD_100ms),
-             SPD = rep("20 SPD  1 ng", 4))
+             SPD = rep("20 SPD   Normal   1 ng", 4))
 id_IT$IT <- factor(id_IT$IT, levels = unique(id_IT$IT))
 ```
 
@@ -3299,7 +3887,8 @@ id_IT_plot <- id_IT %>%
         plot.title = element_text(size = 32, face = "bold",
                                   hjust = -0.2),
         axis.text.x = element_text(hjust = 0.62),
-        axis.title.y = element_text(vjust = 3.4))
+        axis.title.y = element_text(vjust = 3.4),
+        axis.title.x = element_text(vjust = -0.5))
 ```
 
 ## CV
@@ -3369,7 +3958,7 @@ CV_IT_joined$method %>% table()
 
 ```{r}
 CV_IT_joined$method <- factor(CV_IT_joined$method, levels = unique(CV_IT_joined$method))
-CV_IT_joined$SPD <- "20 SPD  1 ng "
+CV_IT_joined$SPD <- "20 SPD   Normal   1 ng "
 
 lim <- 
   c(boxplot.stats(log10(CV_IT_joined[CV_IT_joined$method ==
@@ -3404,7 +3993,7 @@ CV_IT_plot <- CV_IT_joined %>%
        x = "Injection Time")+
   theme(legend.position = "none",
         plot.title = element_text(size = 32, face = "bold",
-                                  hjust = -0.18),
+                                  hjust = -0.175),
         panel.grid = element_blank(),
         axis.title = element_text(size = 27),
         axis.text = element_text(size = 24),
@@ -3414,14 +4003,149 @@ CV_IT_plot <- CV_IT_joined %>%
         plot.margin = margin(t = 20,
                              r = 50,
                              b = 40,
-                             l = 60)) + 
+                             l = 60),
+        axis.title.x = element_text(vjust = -0.5)) + 
   coord_cartesian(ylim = 10^(lim))
+```
+
+## Stacked plot
+
+```{r}
+LITDIA_Normal_20SPD_38ms_CV <- compute_CV(LITDIA_Normal_20SPD_38ms)
+LITDIA_Normal_20SPD_38ms_CV$IT <- "38ms"
+
+LITDIA_Normal_20SPD_60ms_CV <- compute_CV(LITDIA_Normal_20SPD_60ms)
+LITDIA_Normal_20SPD_60ms_CV$IT <- "60ms"
+
+LITDIA_Normal_20SPD_80ms_CV <- compute_CV(LITDIA_Normal_20SPD_80ms)
+LITDIA_Normal_20SPD_80ms_CV$IT <- "80ms"
+
+LITDIA_Normal_20SPD_100ms_CV <- compute_CV(LITDIA_Normal_20SPD_100ms)
+LITDIA_Normal_20SPD_100ms_CV$IT <- "100ms"
+```
+
+### Join and count id
+
+```{r}
+CV_IT_joined <- 
+  rbind(LITDIA_Normal_20SPD_38ms_CV, LITDIA_Normal_20SPD_60ms_CV, 
+        LITDIA_Normal_20SPD_80ms_CV, LITDIA_Normal_20SPD_100ms_CV)
+CV_IT_joined$IT %>% table()
+CV_IT_joined$IT <- factor(CV_IT_joined$IT, 
+                          levels = c("38ms", "60ms", "80ms", "100ms"))
+
+CV_IT_joined$CV_filter <- CV_IT_joined$CV <= 0.2
+
+CV_IT_joined$SPD <- "20 SPD"
+
+CV_IT_joined <- CV_IT_joined %>%
+  filter(!is.na(CV_filter)) %>% 
+  group_by(SPD, IT, CV_filter) %>% 
+  summarise(id_S1 = sum(!is.na(S1)),
+            id_S2 = sum(!is.na(S2)),
+            id_S3 = sum(!is.na(S3)),
+            id_S4 = sum(!is.na(S4)))
+
+CV_IT_joined$mean_id <- rowMeans(CV_IT_joined[4:7], na.rm = TRUE)
+CV_IT_joined$sd_id <- apply(CV_IT_joined[4:7], FUN =  sd, MARGIN = 1, na.rm = TRUE)
+```
+
+### plot 
+
+```{r}
+CV_IT_joined$y_errorbar <- CV_IT_joined$mean_id
+CV_IT_joined$y_errorbar[CV_IT_joined$CV_filter == FALSE] <- 
+  CV_IT_joined$y_errorbar[CV_IT_joined$CV_filter == FALSE] +
+  CV_IT_joined$y_errorbar[CV_IT_joined$CV_filter == TRUE]
+
+IT_stacked_plot <- CV_IT_joined %>% 
+  ggplot(aes(x = IT, y = mean_id, fill = CV_filter))+
+  geom_col(width = 0.7) +
+  facet_grid(~SPD) +
+  labs(x = "Injection Time",
+       y = "Identidied peptides",
+       fill = "CV") +
+  theme(axis.text = element_text(size = 24),
+        axis.title = element_text(size = 27),
+        strip.text = element_text(size = 27),
+        strip.background = element_rect(fill = "#E5E4F7"),
+        panel.grid = element_blank(),
+        axis.text.x = element_text(hjust = 0.62),
+        axis.title.y = element_text(vjust = 2.2),
+        legend.title = element_text(size = 27),
+        legend.text = element_text(size = 22),
+        legend.key.size = unit(0.9, "cm"),
+        axis.title.x = element_text(vjust = -1))+
+  scale_fill_manual(values = c("grey82", "#ff3030"),
+                    labels = c("> 20%", "< or = 20%"))+
+  scale_y_continuous(limits = c(0, 8000)) +
+  geom_errorbar(aes(ymin = y_errorbar - sd_id, 
+                         ymax = y_errorbar + sd_id),
+                    width = 0.2,
+                    size = 1)
+
+IT_stacked_plot
+```
+
+```{r}
+limit <- c(min(c(layer_scales(id_filter_plot_40SPD)$y$get_limits(),
+                 layer_scales(id_filter_plot_20SPD)$y$get_limits())),
+           max(c(layer_scales(id_filter_plot_40SPD)$y$get_limits(),
+                 layer_scales(id_filter_plot_20SPD)$y$get_limits()))+500)
+
+id_filter_plot <- 
+  (((id_filter_plot_40SPD + 
+    scale_y_continuous(limits = limit) +
+     theme(axis.title.x = element_blank(),
+           legend.position = 'none')) +
+  (id_filter_plot_20SPD + 
+     scale_y_continuous(limits = limit) +
+    theme(axis.title.x = element_text(hjust = 2.5, vjust = -1),
+           axis.text.y = element_blank(),
+           axis.ticks.y = element_blank(),
+          axis.title.y = element_blank()))))
+
+id_filter_plot
 ```
 
 ## Fig
 
 ```{r}
 id_IT_plot + CV_IT_plot
+```
+
+# Circle area
+
+```{r}
+table_path <- "C:/Users/samgr/OneDrive - UCL/Documents/Internship/Data/LITDIA/Table/"
+```
+
+
+```{r}
+idk <- read.csv(paste0(table_path, "table_lit.csv"))
+idk <- idk[, c(8,9, 10)] 
+idk$inv_median_CV <- 1/idk$median_CV
+max <- 
+  data.frame(pep_id = max(idk$pep_id) + (max(idk$pep_id)- min(idk$pep_id))/4, 
+             inv_median_CV = max(idk$inv_median_CV) + (max(idk$inv_median_CV)- min(idk$inv_median_CV))/4,
+             median_ppp = max(idk$median_ppp) + (max(idk$median_ppp)- min(idk$median_ppp))/4)
+
+min <- 
+  data.frame(pep_id = min(idk$pep_id) - (max(idk$pep_id)- min(idk$pep_id))/4, 
+             inv_median_CV = min(idk$inv_median_CV) - (max(idk$inv_median_CV)- min(idk$inv_median_CV))/4,
+             median_ppp = min(idk$median_ppp) - (max(idk$median_ppp)- min(idk$median_ppp))/4)
+
+d <- rbind(max, min, idk[, -2])
+
+radarchart(d,
+            pfcol = c("#405D6140", "#06425A40", "#59051440"),
+            pcol = c("#405D61", "#06425A", "#590514"),
+           cglty = 1)
+
+legend("topright",
+       legend = c("Turbo", "Rapid", "Normal"),
+       bty = "n", pch = 20, col = c("#405D61", "#06425A", "#590514"),
+       text.col = "grey25", pt.cex = 2)
 ```
 
 
@@ -3443,5 +4167,9 @@ normalise data
 
 # Bin
 
+```{r}
+temp <- read.csv2(paste0(lit_path, "ppp_test.csv"))
+temp$R.Data.Points.per.Peak..MS2..EXT. %>% table()
+```
 
 
