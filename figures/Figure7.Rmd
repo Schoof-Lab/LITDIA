@@ -1,0 +1,524 @@
+---
+title: "Figure 7"
+author: "Lukas Woltereck"
+date: '2022-06-15'
+output: html_document
+---
+
+# Load packages
+```{r}
+library("tidyverse")
+library("psych")
+library("pheatmap")
+library("ggpubr")
+library("patchwork")
+library("ghibli")
+library("reprex")
+library("ggh4x")
+library("ggplot2")
+lit_path <-"C:/Users/lukwolt/Documents/R/LIT/"
+ot_path <-"C:/Users/lukwolt/Documents/R/OT/"
+pp_path <- "C:/Users/lukwolt/Documents/R/Points_across_a_peak/"
+fig_path <- "C:/Users/lukwolt/Documents/R/Points_across_a_peak/Figures/"
+dvp_path <-"C:/Users/lukwolt/Documents/R/DVP/"
+
+ghibli_palettes$YesterdayMedium
+```
+
+# Load Data
+SN15
+```{r}
+#Normal_1ng_16ms
+LITDIA_Turbo_1_16ms <- read.csv2(paste0(lit_path, "20220502_LIT_Turbo_DIA_1ng_40SPD_whisper100_1CV_auto.csv"))
+#Turbo_5ng_16ms
+LITDIA_Turbo_5_16ms <- read.csv2(paste0(lit_path, "20220502_LIT_Turbo_DIA_5ng_40SPD_whisper100_1CV_auto.csv"))
+#Turbo_10ng_16ms
+LITDIA_Turbo_10_16ms <- read.csv2(paste0(lit_path, "20220502_LIT_Turbo_DIA_10ng_40SPD_whisper100_1CV_auto.csv"))
+#Turbo_100ng_16ms
+LITDIA_Turbo_100_16ms <- read.csv2(paste0(lit_path, "20220502_LIT_Turbo_DIA_100ng_40SPD_whisper100_1CV_auto.csv"))
+
+#Rapid_1ng_23ms
+LITDIA_Rapid_1_23ms <- read.csv2(paste0(lit_path, "20220421_LIT_Rapid_DIA_1ng_40SPD_whisper100_1CV_auto.csv"))
+#Rapid_5ng_23ms
+LITDIA_Rapid_5_23ms <- read.csv2(paste0(lit_path, "20220502_LIT_Rapid_DIA_5ng_40SPD_whisper100_1CV_auto.csv"))
+#Rapid_10ng_23ms
+LITDIA_Rapid_10_23ms <- read.csv2(paste0(lit_path, "20220502_LIT_Rapid_DIA_10ng_40SPD_whisper100_1CV_auto.csv"))
+#Rapid_100ng_23ms
+LITDIA_Rapid_100_23ms <- read.csv2(paste0(lit_path, "20220421_LIT_Rapid_DIA_100ng_40SPD_whisper100_1CV_auto.csv"))
+
+#Normal_1ng_38ms
+LITDIA_Normal_1_38ms <- read.csv2(paste0(lit_path, "20220421_LIT_Normal_DIA_1ng_40SPD_whisper100_1CV_auto.csv"))
+#Normal_5ng_38ms
+LITDIA_Normal_5_38ms <- read.csv2(paste0(lit_path, "20220502_LIT_Normal_DIA_5ng_40SPD_whisper100_1CV_auto.csv"))
+#Normal_10ng_38ms
+LITDIA_Normal_10_38ms <- read.csv2(paste0(lit_path, "20220502_LIT_Normal_DIA_10ng_40SPD_whisper100_1CV_auto.csv"))
+#Normal_100ng_38ms
+LITDIA_Normal_100_38ms <- read.csv2(paste0(lit_path, "20220421_LIT_Normal_DIA_100ng_40SPD_whisper100_1CV_auto.csv"))
+```
+
+SN16
+```{r}
+#Turbo 1ng
+LITDIA_Turbo_40SPD_40w_1ng_SN16 <- read.csv2(paste0(lit_path, "20220615_SN16_40SPD_LIT_Turbo_1CV_1ng_auto_40w.csv"))
+#Turbo 5ng
+LITDIA_Turbo_40SPD_40w_5ng_SN16 <- read.csv2(paste0(lit_path, "20220615_SN16_40SPD_LIT_Turbo_1CV_5ng_auto_40w.csv"))
+#Turbo 10ng
+LITDIA_Turbo_40SPD_40w_10ng_SN16 <- read.csv2(paste0(lit_path, "20220615_SN16_40SPD_LIT_Turbo_1CV_10ng_auto_40w.csv"))
+#Turbo 100ng
+LITDIA_Turbo_40SPD_40w_100ng_SN16 <- read.csv2(paste0(lit_path, "20220615_SN16_40SPD_LIT_Turbo_1CV_100ng_auto_40w.csv"))
+
+#Rapid 1ng
+LITDIA_Rapid_40SPD_40w_1ng_SN16 <- read.csv2(paste0(lit_path, "20220615_SN16_40SPD_LIT_Rapid_1CV_1ng_auto_40w.csv"))
+#Rapid 5ng
+LITDIA_Rapid_40SPD_40w_5ng_SN16 <- read.csv2(paste0(lit_path, "20220615_SN16_40SPD_LIT_Rapid_1CV_5ng_auto_40w.csv"))
+#Rapid 10ng
+LITDIA_Rapid_40SPD_40w_10ng_SN16 <- read.csv2(paste0(lit_path, "20220615_SN16_40SPD_LIT_Rapid_1CV_10ng_auto_40w.csv"))
+#Rapid 100ng
+LITDIA_Rapid_40SPD_40w_100ng_SN16 <- read.csv2(paste0(lit_path, "20220615_SN16_40SPD_LIT_Rapid_1CV_100ng_auto_40w.csv"))
+
+#Normal 1ng
+LITDIA_Normal_40SPD_40w_1ng_SN16 <- read.csv2(paste0(lit_path, "20220615_SN16_40SPD_LIT_Normal_1CV_1ng_auto_40w.csv"))
+#Normal 5ng
+LITDIA_Normal_40SPD_40w_5ng_SN16 <- read.csv2(paste0(lit_path, "20220615_SN16_40SPD_LIT_Normal_1CV_5ng_auto_40w.csv"))
+#Normal 10ng
+LITDIA_Normal_40SPD_40w_10ng_SN16 <- read.csv2(paste0(lit_path, "20220615_SN16_40SPD_LIT_Normal_1CV_10ng_auto_40w.csv"))
+#Normal 100ng
+LITDIA_Normal_40SPD_40w_100ng_SN16 <- read.csv2(paste0(lit_path, "20220615_SN16_40SPD_LIT_Normal_1CV_100ng_auto_40w.csv"))
+```
+
+# Remove peptides found in less than 3 replicates
+```{r}
+filter_pep <- function(x) {
+  x$FG.Quantity[as.logical(x$EG.IsImputed)] <- NA
+  y <- x %>% 
+  group_by(R.FileName, PEP.StrippedSequence) %>% 
+  summarise(mean_quantity = mean(FG.Quantity, na.rm = TRUE)) %>%  
+  pivot_wider(names_from = R.FileName, 
+              values_from = mean_quantity) %>%
+    suppressMessages()
+  z <- y %>% 
+  mutate(na_nbr = rowSums(is.na(y[-1]))) %>%
+  mutate(mean_quantity = rowMeans(y[2:ncol(y)], na.rm = TRUE)) %>%
+  mutate(filtered = !na_nbr <= 1) %>% 
+  select(-na_nbr) %>% 
+  suppressMessages("`summarise()` has grouped output by 'R.FileName'. You can override using the `.groups` argument.")
+  message("Highlighted ", sum(z$filtered), " peptide(s) found in less than ", ncol(y) -2, " replicates")
+  
+ return(z) }
+
+```
+
+SN15
+```{r}
+LITDIA_Turbo_1_16ms <-  filter_pep(LITDIA_Turbo_1_16ms)
+LITDIA_Turbo_5_16ms <-  filter_pep(LITDIA_Turbo_5_16ms)
+LITDIA_Turbo_10_16ms <-  filter_pep(LITDIA_Turbo_10_16ms)
+LITDIA_Turbo_100_16ms <-  filter_pep(LITDIA_Turbo_100_16ms)
+
+LITDIA_Rapid_1_23ms <-  filter_pep(LITDIA_Rapid_1_23ms)
+LITDIA_Rapid_5_23ms <-  filter_pep(LITDIA_Rapid_5_23ms)
+LITDIA_Rapid_10_23ms <-  filter_pep(LITDIA_Rapid_10_23ms)
+LITDIA_Rapid_100_23ms <-  filter_pep(LITDIA_Rapid_100_23ms)
+
+LITDIA_Normal_1_38ms <-  filter_pep(LITDIA_Normal_1_38ms)
+LITDIA_Normal_5_38ms <-  filter_pep(LITDIA_Normal_5_38ms)
+LITDIA_Normal_10_38ms <-  filter_pep(LITDIA_Normal_10_38ms)
+LITDIA_Normal_100_38ms <-  filter_pep(LITDIA_Normal_100_38ms)
+```
+
+SN16
+```{r}
+LITDIA_Turbo_40SPD_40w_1ng_SN16 <-  filter_pep(LITDIA_Turbo_40SPD_40w_1ng_SN16)
+LITDIA_Turbo_40SPD_40w_5ng_SN16 <-  filter_pep(LITDIA_Turbo_40SPD_40w_5ng_SN16)
+LITDIA_Turbo_40SPD_40w_10ng_SN16 <-  filter_pep(LITDIA_Turbo_40SPD_40w_10ng_SN16)
+LITDIA_Turbo_40SPD_40w_100ng_SN16 <-  filter_pep(LITDIA_Turbo_40SPD_40w_100ng_SN16)
+
+LITDIA_Rapid_40SPD_40w_1ng_SN16 <-  filter_pep(LITDIA_Rapid_40SPD_40w_1ng_SN16)
+LITDIA_Rapid_40SPD_40w_5ng_SN16 <-  filter_pep(LITDIA_Rapid_40SPD_40w_5ng_SN16)
+LITDIA_Rapid_40SPD_40w_10ng_SN16 <-  filter_pep(LITDIA_Rapid_40SPD_40w_10ng_SN16)
+LITDIA_Rapid_40SPD_40w_100ng_SN16 <-  filter_pep(LITDIA_Rapid_40SPD_40w_100ng_SN16)
+
+LITDIA_Normal_40SPD_40w_1ng_SN16 <-  filter_pep(LITDIA_Normal_40SPD_40w_1ng_SN16)
+LITDIA_Normal_40SPD_40w_5ng_SN16 <-  filter_pep(LITDIA_Normal_40SPD_40w_5ng_SN16)
+LITDIA_Normal_40SPD_40w_10ng_SN16 <-  filter_pep(LITDIA_Normal_40SPD_40w_10ng_SN16)
+LITDIA_Normal_40SPD_40w_100ng_SN16 <-  filter_pep(LITDIA_Normal_40SPD_40w_100ng_SN16)
+```
+
+# Detect the number of identified peptides
+```{r}
+id_LITDIA_Turbo_1_16ms <- id_LITDIA_Turbo_5_16ms <- id_LITDIA_Turbo_10_16ms <- id_LITDIA_Turbo_100_16ms <-
+id_LITDIA_Rapid_1_23ms <- id_LITDIA_Rapid_5_23ms <- id_LITDIA_Rapid_10_23ms <- id_LITDIA_Rapid_100_23ms <-
+id_LITDIA_Normal_1_38ms <- id_LITDIA_Normal_5_38ms <- id_LITDIA_Normal_10_38ms <- id_LITDIA_Normal_100_38ms <-
+
+id_LITDIA_Turbo_40SPD_40w_1ng_SN16 <- id_LITDIA_Turbo_40SPD_40w_5ng_SN16 <- id_LITDIA_Turbo_40SPD_40w_10ng_SN16 <- id_LITDIA_Turbo_40SPD_40w_100ng_SN16 <-
+id_LITDIA_Rapid_40SPD_40w_1ng_SN16 <- id_LITDIA_Rapid_40SPD_40w_5ng_SN16 <- id_LITDIA_Rapid_40SPD_40w_10ng_SN16 <- id_LITDIA_Rapid_40SPD_40w_100ng_SN16 <-
+id_LITDIA_Normal_40SPD_40w_1ng_SN16 <- id_LITDIA_Normal_40SPD_40w_5ng_SN16 <- id_LITDIA_Normal_40SPD_40w_10ng_SN16 <- id_LITDIA_Normal_40SPD_40w_100ng_SN16 <- rep(NA, 4)
+```
+SN15
+Turbo 1ng
+```{r}
+for(i in 2:5){
+  id_LITDIA_Turbo_1_16ms[i-1] <- sum(!is.na(LITDIA_Turbo_1_16ms[, i]))}
+```
+Turbo 5ng
+```{r}
+for(i in 2:5){
+  id_LITDIA_Turbo_5_16ms[i-1] <- sum(!is.na(LITDIA_Turbo_5_16ms[, i]))}
+```
+Turbo 10ng
+```{r}
+for(i in 2:5){
+  id_LITDIA_Turbo_10_16ms[i-1] <- sum(!is.na(LITDIA_Turbo_10_16ms[, i]))}
+```
+Turbo 100ng
+```{r}
+for(i in 2:5){
+  id_LITDIA_Turbo_100_16ms[i-1] <- sum(!is.na(LITDIA_Turbo_100_16ms[, i]))}
+```
+Rapid 1ng
+```{r}
+for(i in 2:5){
+  id_LITDIA_Rapid_1_23ms[i-1] <- sum(!is.na(LITDIA_Rapid_1_23ms[, i]))}
+```
+Rapid 5ng
+```{r}
+for(i in 2:5){
+  id_LITDIA_Rapid_5_23ms[i-1] <- sum(!is.na(LITDIA_Rapid_5_23ms[, i]))}
+```
+Rapid 10ng
+```{r}
+for(i in 2:5){
+  id_LITDIA_Rapid_10_23ms[i-1] <- sum(!is.na(LITDIA_Rapid_10_23ms[, i]))}
+```
+Rapid 100ng
+```{r}
+for(i in 2:5){
+  id_LITDIA_Rapid_100_23ms[i-1] <- sum(!is.na(LITDIA_Rapid_100_23ms[, i]))}
+```
+Normal 1ng
+```{r}
+for(i in 2:5){
+  id_LITDIA_Normal_1_38ms[i-1] <- sum(!is.na(LITDIA_Normal_1_38ms[, i]))}
+```
+Normal 5ng
+```{r}
+for(i in 2:5){
+  id_LITDIA_Normal_5_38ms[i-1] <- sum(!is.na(LITDIA_Normal_5_38ms[, i]))}
+```
+Normal 10ng
+```{r}
+for(i in 2:5){
+  id_LITDIA_Normal_10_38ms[i-1] <- sum(!is.na(LITDIA_Normal_10_38ms[, i]))}
+```
+Normal 100ng
+```{r}
+for(i in 2:5){
+  id_LITDIA_Normal_100_38ms[i-1] <- sum(!is.na(LITDIA_Normal_100_38ms[, i]))}
+```
+
+SN16
+Turbo 1ng
+```{r}
+for(i in 2:5){
+  id_LITDIA_Turbo_40SPD_40w_1ng_SN16[i-1] <- sum(!is.na(LITDIA_Turbo_40SPD_40w_1ng_SN16[, i]))}
+```
+Turbo 5ng
+```{r}
+for(i in 2:5){
+  id_LITDIA_Turbo_40SPD_40w_5ng_SN16[i-1] <- sum(!is.na(LITDIA_Turbo_40SPD_40w_5ng_SN16[, i]))}
+```
+Turbo 10ng
+```{r}
+for(i in 2:5){
+  id_LITDIA_Turbo_40SPD_40w_10ng_SN16[i-1] <- sum(!is.na(LITDIA_Turbo_40SPD_40w_10ng_SN16[, i]))}
+```
+Turbo 100ng
+```{r}
+for(i in 2:5){
+  id_LITDIA_Turbo_40SPD_40w_100ng_SN16[i-1] <- sum(!is.na(LITDIA_Turbo_40SPD_40w_100ng_SN16[, i]))}
+```
+Rapid 1ng
+```{r}
+for(i in 2:5){
+  id_LITDIA_Rapid_40SPD_40w_1ng_SN16[i-1] <- sum(!is.na(LITDIA_Rapid_40SPD_40w_1ng_SN16[, i]))}
+```
+Rapid 5ng
+```{r}
+for(i in 2:5){
+  id_LITDIA_Rapid_40SPD_40w_5ng_SN16[i-1] <- sum(!is.na(LITDIA_Rapid_40SPD_40w_5ng_SN16[, i]))}
+```
+Rapid 10ng
+```{r}
+for(i in 2:5){
+  id_LITDIA_Rapid_40SPD_40w_10ng_SN16[i-1] <- sum(!is.na(LITDIA_Rapid_40SPD_40w_10ng_SN16[, i]))}
+```
+Rapid 100ng
+```{r}
+for(i in 2:5){
+  id_LITDIA_Rapid_40SPD_40w_100ng_SN16[i-1] <- sum(!is.na(LITDIA_Rapid_40SPD_40w_100ng_SN16[, i]))}
+```
+Normal 1ng
+```{r}
+for(i in 2:5){
+  id_LITDIA_Normal_40SPD_40w_1ng_SN16[i-1] <- sum(!is.na(LITDIA_Normal_40SPD_40w_1ng_SN16[, i]))}
+```
+Normal 5ng
+```{r}
+for(i in 2:5){
+  id_LITDIA_Normal_40SPD_40w_5ng_SN16[i-1] <- sum(!is.na(LITDIA_Normal_40SPD_40w_5ng_SN16[, i]))}
+```
+Normal 10ng
+```{r}
+for(i in 2:5){
+  id_LITDIA_Normal_40SPD_40w_10ng_SN16[i-1] <- sum(!is.na(LITDIA_Normal_40SPD_40w_10ng_SN16[, i]))}
+```
+Normal 100ng
+```{r}
+for(i in 2:5){
+  id_LITDIA_Normal_40SPD_40w_100ng_SN16[i-1] <- sum(!is.na(LITDIA_Normal_40SPD_40w_100ng_SN16[, i]))}
+```
+
+# Complement the table
+```{r}
+compute_CV <- function(x){
+  y <- x %>% 
+    mutate(sd = apply(x[, 2:(ncol(x)-2)],
+                      FUN = sd, MARGIN =  1, na.rm = TRUE),
+           CV = sd/mean_quantity)
+  colnames(y)[2:(ncol(x)-2)] <- paste0("S", 1:(ncol(x)-3))
+  if(ncol(x) <= 6){
+  y$S4 <- NA
+ }
+  return(y)
+}
+```
+
+```{r}
+#Turbo 1ng
+LITDIA_Turbo_1_16ms_cv <- compute_CV(LITDIA_Turbo_1_16ms)
+LITDIA_Turbo_1_16ms_cv$input<- "1 ng"
+LITDIA_Turbo_1_16ms_cv$version<- "S15"
+LITDIA_Turbo_1_16ms_cv$scanning_mode<- "Turbo"
+
+#Turbo 5ng
+LITDIA_Turbo_5_16ms_cv <- compute_CV(LITDIA_Turbo_5_16ms)
+LITDIA_Turbo_5_16ms_cv$input<- "5 ng"
+LITDIA_Turbo_5_16ms_cv$version<- "S15"
+LITDIA_Turbo_5_16ms_cv$scanning_mode<- "Turbo"
+
+#Turbo 10ng
+LITDIA_Turbo_10_16ms_cv <- compute_CV(LITDIA_Turbo_10_16ms)
+LITDIA_Turbo_10_16ms_cv$input<- "10 ng"
+LITDIA_Turbo_10_16ms_cv$version<- "S15"
+LITDIA_Turbo_10_16ms_cv$scanning_mode<- "Turbo"
+
+#Turbo 100ng
+LITDIA_Turbo_100_16ms_cv <- compute_CV(LITDIA_Turbo_100_16ms)
+LITDIA_Turbo_100_16ms_cv$input<- "100 ng"
+LITDIA_Turbo_100_16ms_cv$version<- "S15"
+LITDIA_Turbo_100_16ms_cv$scanning_mode<- "Turbo"
+
+#Rapid 1ng
+LITDIA_Rapid_1_23ms_cv <- compute_CV(LITDIA_Rapid_1_23ms)
+LITDIA_Rapid_1_23ms_cv$input<- "1 ng"
+LITDIA_Rapid_1_23ms_cv$version<- "S15"
+LITDIA_Rapid_1_23ms_cv$scanning_mode<- "Rapid"
+
+#Rapid 5ng
+LITDIA_Rapid_5_23ms_cv <- compute_CV(LITDIA_Rapid_5_23ms)
+LITDIA_Rapid_5_23ms_cv$input<- "5 ng"
+LITDIA_Rapid_5_23ms_cv$version<- "S15"
+LITDIA_Rapid_5_23ms_cv$scanning_mode<- "Rapid"
+
+#Rapid 10ng
+LITDIA_Rapid_10_23ms_cv <- compute_CV(LITDIA_Rapid_10_23ms)
+LITDIA_Rapid_10_23ms_cv$input<- "10 ng"
+LITDIA_Rapid_10_23ms_cv$version<- "S15"
+LITDIA_Rapid_10_23ms_cv$scanning_mode<- "Rapid"
+
+#Rapid 100ng
+LITDIA_Rapid_100_23ms_cv <- compute_CV(LITDIA_Rapid_100_23ms)
+LITDIA_Rapid_100_23ms_cv$input<- "100 ng"
+LITDIA_Rapid_100_23ms_cv$version<- "S15"
+LITDIA_Rapid_100_23ms_cv$scanning_mode<- "Rapid"
+
+#Normal 1ng
+LITDIA_Normal_1_38ms_cv <- compute_CV(LITDIA_Normal_1_38ms)
+LITDIA_Normal_1_38ms_cv$input<- "1 ng"
+LITDIA_Normal_1_38ms_cv$version<- "S15"
+LITDIA_Normal_1_38ms_cv$scanning_mode<- "Normal"
+
+#Normal 5ng
+LITDIA_Normal_5_38ms_cv <- compute_CV(LITDIA_Normal_5_38ms)
+LITDIA_Normal_5_38ms_cv$input<- "5 ng"
+LITDIA_Normal_5_38ms_cv$version<- "S15"
+LITDIA_Normal_5_38ms_cv$scanning_mode<- "Normal"
+
+#Normal 10ng
+LITDIA_Normal_10_38ms_cv <- compute_CV(LITDIA_Normal_10_38ms)
+LITDIA_Normal_10_38ms_cv$input<- "10 ng"
+LITDIA_Normal_10_38ms_cv$version<- "S15"
+LITDIA_Normal_10_38ms_cv$scanning_mode<- "Normal"
+
+#Normal 100ng
+LITDIA_Normal_100_38ms_cv <- compute_CV(LITDIA_Normal_100_38ms)
+LITDIA_Normal_100_38ms_cv$input<- "100 ng"
+LITDIA_Normal_100_38ms_cv$version<- "S15"
+LITDIA_Normal_100_38ms_cv$scanning_mode<- "Normal"
+```
+
+SN16
+```{r}
+#Turbo 1ng
+LITDIA_Turbo_40SPD_40w_1ng_SN16_cv <- compute_CV(LITDIA_Turbo_40SPD_40w_1ng_SN16)
+LITDIA_Turbo_40SPD_40w_1ng_SN16_cv$input<- "1 ng"
+LITDIA_Turbo_40SPD_40w_1ng_SN16_cv$version<- "S16"
+LITDIA_Turbo_40SPD_40w_1ng_SN16_cv$scanning_mode<- "Turbo"
+
+#Turbo 5ng
+LITDIA_Turbo_40SPD_40w_5ng_SN16_cv <- compute_CV(LITDIA_Turbo_40SPD_40w_1ng_SN16)
+LITDIA_Turbo_40SPD_40w_5ng_SN16_cv$input<- "5 ng"
+LITDIA_Turbo_40SPD_40w_5ng_SN16_cv$version<- "S16"
+LITDIA_Turbo_40SPD_40w_5ng_SN16_cv$scanning_mode<- "Turbo"
+
+#Turbo 10ng
+LITDIA_Turbo_40SPD_40w_10ng_SN16_cv <- compute_CV(LITDIA_Turbo_40SPD_40w_10ng_SN16)
+LITDIA_Turbo_40SPD_40w_10ng_SN16_cv$input<- "10 ng"
+LITDIA_Turbo_40SPD_40w_10ng_SN16_cv$version<- "S16"
+LITDIA_Turbo_40SPD_40w_10ng_SN16_cv$scanning_mode<- "Turbo"
+
+#Turbo 100ng
+LITDIA_Turbo_40SPD_40w_100ng_SN16_cv <- compute_CV(LITDIA_Turbo_40SPD_40w_100ng_SN16)
+LITDIA_Turbo_40SPD_40w_100ng_SN16_cv$input<- "100 ng"
+LITDIA_Turbo_40SPD_40w_100ng_SN16_cv$version<- "S16"
+LITDIA_Turbo_40SPD_40w_100ng_SN16_cv$scanning_mode<- "Turbo"
+
+#Rapid 1ng
+LITDIA_Rapid_40SPD_40w_1ng_SN16_cv <- compute_CV(LITDIA_Rapid_40SPD_40w_1ng_SN16)
+LITDIA_Rapid_40SPD_40w_1ng_SN16_cv$input<- "1 ng"
+LITDIA_Rapid_40SPD_40w_1ng_SN16_cv$version<- "S16"
+LITDIA_Rapid_40SPD_40w_1ng_SN16_cv$scanning_mode<- "Rapid"
+
+#Rapid 5ng
+LITDIA_Rapid_40SPD_40w_5ng_SN16_cv <- compute_CV(LITDIA_Rapid_40SPD_40w_1ng_SN16)
+LITDIA_Rapid_40SPD_40w_5ng_SN16_cv$input<- "5 ng"
+LITDIA_Rapid_40SPD_40w_5ng_SN16_cv$version<- "S16"
+LITDIA_Rapid_40SPD_40w_5ng_SN16_cv$scanning_mode<- "Rapid"
+
+#Rapid 10ng
+LITDIA_Rapid_40SPD_40w_10ng_SN16_cv <- compute_CV(LITDIA_Rapid_40SPD_40w_10ng_SN16)
+LITDIA_Rapid_40SPD_40w_10ng_SN16_cv$input<- "10 ng"
+LITDIA_Rapid_40SPD_40w_10ng_SN16_cv$version<- "S16"
+LITDIA_Rapid_40SPD_40w_10ng_SN16_cv$scanning_mode<- "Rapid"
+
+#Rapid 100ng
+LITDIA_Rapid_40SPD_40w_100ng_SN16_cv <- compute_CV(LITDIA_Rapid_40SPD_40w_100ng_SN16)
+LITDIA_Rapid_40SPD_40w_100ng_SN16_cv$input<- "100 ng"
+LITDIA_Rapid_40SPD_40w_100ng_SN16_cv$version<- "S16"
+LITDIA_Rapid_40SPD_40w_100ng_SN16_cv$scanning_mode<- "Rapid"
+
+#Normal 1ng
+LITDIA_Normal_40SPD_40w_1ng_SN16_cv <- compute_CV(LITDIA_Normal_40SPD_40w_1ng_SN16)
+LITDIA_Normal_40SPD_40w_1ng_SN16_cv$input<- "1 ng"
+LITDIA_Normal_40SPD_40w_1ng_SN16_cv$version<- "S16"
+LITDIA_Normal_40SPD_40w_1ng_SN16_cv$scanning_mode<- "Normal"
+
+#Normal 5ng
+LITDIA_Normal_40SPD_40w_5ng_SN16_cv <- compute_CV(LITDIA_Normal_40SPD_40w_1ng_SN16)
+LITDIA_Normal_40SPD_40w_5ng_SN16_cv$input<- "5 ng"
+LITDIA_Normal_40SPD_40w_5ng_SN16_cv$version<- "S16"
+LITDIA_Normal_40SPD_40w_5ng_SN16_cv$scanning_mode<- "Normal"
+
+#Normal 10ng
+LITDIA_Normal_40SPD_40w_10ng_SN16_cv <- compute_CV(LITDIA_Normal_40SPD_40w_10ng_SN16)
+LITDIA_Normal_40SPD_40w_10ng_SN16_cv$input<- "10 ng"
+LITDIA_Normal_40SPD_40w_10ng_SN16_cv$version<- "S16"
+LITDIA_Normal_40SPD_40w_10ng_SN16_cv$scanning_mode<- "Normal"
+
+#Normal 100ng
+LITDIA_Normal_40SPD_40w_100ng_SN16_cv <- compute_CV(LITDIA_Normal_40SPD_40w_100ng_SN16)
+LITDIA_Normal_40SPD_40w_100ng_SN16_cv$input<- "100 ng"
+LITDIA_Normal_40SPD_40w_100ng_SN16_cv$version<- "S16"
+LITDIA_Normal_40SPD_40w_100ng_SN16_cv$scanning_mode<- "Normal"
+
+```
+
+# Join
+```{r}
+id_figure7 <- 
+  rbind(LITDIA_Turbo_1_16ms_cv, LITDIA_Turbo_5_16ms_cv, LITDIA_Turbo_10_16ms_cv, LITDIA_Turbo_100_16ms_cv,
+LITDIA_Rapid_1_23ms_cv, LITDIA_Rapid_5_23ms_cv, LITDIA_Rapid_10_23ms_cv, LITDIA_Rapid_100_23ms_cv,
+LITDIA_Normal_1_38ms_cv, LITDIA_Normal_5_38ms_cv, LITDIA_Normal_10_38ms_cv, LITDIA_Normal_100_38ms_cv,
+
+LITDIA_Turbo_40SPD_40w_1ng_SN16_cv, LITDIA_Turbo_40SPD_40w_5ng_SN16_cv, LITDIA_Turbo_40SPD_40w_10ng_SN16_cv, LITDIA_Turbo_40SPD_40w_100ng_SN16_cv,
+LITDIA_Rapid_40SPD_40w_1ng_SN16_cv, LITDIA_Rapid_40SPD_40w_5ng_SN16_cv, LITDIA_Rapid_40SPD_40w_10ng_SN16_cv, LITDIA_Rapid_40SPD_40w_100ng_SN16_cv,
+LITDIA_Normal_40SPD_40w_1ng_SN16_cv, LITDIA_Normal_40SPD_40w_5ng_SN16_cv, LITDIA_Normal_40SPD_40w_10ng_SN16_cv, LITDIA_Normal_40SPD_40w_100ng_SN16_cv)
+
+id_figure7$input %>% table()
+id_figure7$scanning_mode %>% table() 
+id_figure7$version %>% table()
+
+id_figure7$input <- factor(id_figure7$input, 
+                          levels = unique(id_figure7$input))
+id_figure7$scanning_mode <- factor(id_figure7$scanning_mode, 
+                          levels = unique(id_figure7$scanning_mode))
+id_figure7$version <- factor(id_figure7$version, 
+                          levels = unique(id_figure7$version))
+
+id_figure7$CV_filter <- NA
+id_figure7$CV_filter[id_figure7$CV < 0.1] <- "3"
+id_figure7$CV_filter[id_figure7$CV >= 0.1 & id_figure7$CV <= 0.15] <- "2"
+id_figure7$CV_filter[id_figure7$CV > 0.15] <- "1"
+
+id_figure7 <- id_figure7 %>%
+  filter(!is.na(CV_filter)) %>% 
+  group_by(input, CV_filter, scanning_mode, version) %>% 
+  summarise(id_S1 = sum(!is.na(S1)),
+            id_S2 = sum(!is.na(S2)),
+            id_S3 = sum(!is.na(S3)),
+            id_S4 = sum(!is.na(S4)))
+id_figure7$id_S4[id_figure7$id_S4 == 0] <- NA 
+
+id_figure7$mean_id <- rowMeans(id_figure7[5:8], na.rm = TRUE)
+id_figure7$sd_id <- apply(id_figure7[5:8], FUN =  sd, MARGIN = 1, na.rm = TRUE)
+```
+
+# Plot
+```{r}
+id_figure7$y_errorbar <- id_figure7$mean_id
+id_figure7$y_errorbar[id_figure7$CV_filter == "1"] <-
+  id_figure7$y_errorbar[id_figure7$CV_filter == "1"] +
+  id_figure7$y_errorbar[id_figure7$CV_filter == "2"]+
+  id_figure7$y_errorbar[id_figure7$CV_filter == "3"]
+id_figure7$y_errorbar[id_figure7$CV_filter == "2"] <-
+  id_figure7$y_errorbar[id_figure7$CV_filter == "2"]+
+  id_figure7$y_errorbar[id_figure7$CV_filter == "3"]
+
+figure7 <- id_figure7 %>% filter(input != "5 ng") %>%
+  ggplot(aes(x = version, y = mean_id, fill = CV_filter))+
+  geom_col(width = 0.7) +
+  labs(x = "Spectronaut version",
+       y = "Identified peptides",
+       fill = "CV") +
+  facet_grid(input~scanning_mode)+
+  theme_bw() +
+  theme(axis.text = element_text(size = 24),
+        axis.title = element_text(size = 27),
+        strip.text = element_text(size = 27),
+        strip.background = element_rect(fill = "#E5E4F7"),
+        axis.title.y = element_text(vjust = 2.2),
+        axis.text.x = element_text(angle = 90, vjust = 0.3, hjust = 1),
+        legend.title = element_text(size = 27),
+        axis.title.x = element_text(vjust = 0.2),
+        legend.text = element_text(size = 27),
+        legend.key.size = unit(0.9, "cm"))+
+  scale_fill_manual(values = c("grey82", "#FF9090", "#FF3030"),
+                    labels = c("\U2265 15%", "10 - 15%", "< 10%" ))+
+  geom_errorbar(aes(ymin = y_errorbar - sd_id, 
+                         ymax = y_errorbar + sd_id),
+                    width = 0.2,
+                    size = 1)
+cairo_pdf(filename = "fig8.pdf", width = 14.58, height = 7.81)
+figure7
+dev.off()
+```
