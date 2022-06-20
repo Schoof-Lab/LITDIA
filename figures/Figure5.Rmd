@@ -7,7 +7,6 @@ output: html_document
 ---
 
 # Load packages
-
 ```{r}
 library("tidyverse")
 library("psych")
@@ -20,9 +19,10 @@ library("ggh4x")
 library("ggplot2")
 lit_path <-"C:/Users/lukwolt/Documents/R/LIT/"
 ot_path <-"C:/Users/lukwolt/Documents/R/OT/"
-
+pp_path <- "C:/Users/lukwolt/Documents/R/Points_across_a_peak/"
+fig_path <- "C:/Users/lukwolt/Documents/R/Points_across_a_peak/Figures/"
+  
 ghibli_palettes$YesterdayMedium
-
 ```
 
 # Load data
@@ -141,6 +141,26 @@ LITDIA_Normal_100_38ms <- read.csv2(paste0(lit_path, "20220421_LIT_Normal_DIA_10
 ```
 
 # Remove peptides found in less than 3 replicates
+```{r}
+filter_pep <- function(x) {
+  x$FG.Quantity[as.logical(x$EG.IsImputed)] <- NA
+  y <- x %>% 
+  group_by(R.FileName, PEP.StrippedSequence) %>% 
+  summarise(mean_quantity = mean(FG.Quantity, na.rm = TRUE)) %>%  
+  pivot_wider(names_from = R.FileName, 
+              values_from = mean_quantity) %>%
+    suppressMessages()
+  z <- y %>% 
+  mutate(na_nbr = rowSums(is.na(y[-1]))) %>%
+  mutate(mean_quantity = rowMeans(y[2:ncol(y)], na.rm = TRUE)) %>%
+  mutate(filtered = !na_nbr <= 1) %>% 
+  select(-na_nbr) %>% 
+  suppressMessages("`summarise()` has grouped output by 'R.FileName'. You can override using the `.groups` argument.")
+  message("Highlighted ", sum(z$filtered), " peptide(s) found in less than ", ncol(y) -2, " replicates")
+  
+ return(z) }
+
+```
 
 8ms clean
 ```{r}

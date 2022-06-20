@@ -7,7 +7,6 @@ output: html_document
 ---
 
 # Load packages
-
 ```{r}
 library("tidyverse")
 library("psych")
@@ -20,9 +19,10 @@ library("ggh4x")
 library("ggplot2")
 lit_path <-"C:/Users/lukwolt/Documents/R/LIT/"
 ot_path <-"C:/Users/lukwolt/Documents/R/OT/"
-
+pp_path <- "C:/Users/lukwolt/Documents/R/Points_across_a_peak/"
+fig_path <- "C:/Users/lukwolt/Documents/R/Points_across_a_peak/Figures/"
+  
 ghibli_palettes$YesterdayMedium
-
 ```
 
 # Load data 20SPD

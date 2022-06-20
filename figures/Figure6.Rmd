@@ -5,29 +5,23 @@ date: '2022-06-20'
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 # Load packages
 ```{r}
 library("tidyverse")
-library("UpSetR")
-library("patchwork")
-library("ggpubr")
-library("ggpointdensity")
-library("kableExtra")
-library("ggupset")
+library("psych")
 library("pheatmap")
-library("robustbase")
-library("fmsb")
-library("ggrepel")
-
-#set bw theme as default theme
-theme_set(theme_bw())
-
-teera_palette <- c("#EEB9CF","#DF7FA7","#D35087","#EAACC6",
-                   "#C9D7F0","#7F9FDB","#527DCE","#ADC2E8")
+library("ggpubr")
+library("patchwork")
+library("ghibli")
+library("reprex")
+library("ggh4x")
+library("ggplot2")
+lit_path <-"C:/Users/lukwolt/Documents/R/LIT/"
+ot_path <-"C:/Users/lukwolt/Documents/R/OT/"
+pp_path <- "C:/Users/lukwolt/Documents/R/Points_across_a_peak/"
+fig_path <- "C:/Users/lukwolt/Documents/R/Points_across_a_peak/Figures/"
+  
+ghibli_palettes$YesterdayMedium
 ```
 
 # Load data
@@ -114,7 +108,6 @@ pp_Normal_20SPD_100$indiv <- "Normal_20SPD_100_"
 ```
 
 # Join
-
 ```{r}
 colnames(pp_Turbo_40SPD_1) <- colnames(pp_Turbo_40SPD_5) <- colnames(pp_Turbo_40SPD_10) <-
   colnames(pp_Turbo_40SPD_100) <- colnames(pp_Rapid_40SPD_1) <- colnames(pp_Rapid_40SPD_5) <-

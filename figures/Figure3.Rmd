@@ -7,32 +7,20 @@ output: html_document
 # Load packages
 ```{r}
 library("tidyverse")
-library("UpSetR")
-library("patchwork")
-library("ggpubr")
-library("ggpointdensity")
-library("kableExtra")
-library("ggupset")
+library("psych")
 library("pheatmap")
-library("robustbase")
-library("fmsb")
-library("ggrepel")
-
-#set bw theme as default theme
-theme_set(theme_bw())
-```
-
-# Load paths
-
-```{r, echo = FALSE}
-lit_path <- 
-  "C:/Users/lukwolt/Documents/R/LIT/"
-ot_path <- 
- "C:/Users/lukwolt/Documents/R/OT/"
-pp_path <- 
-   "C:/Users/lukwolt/Documents/R/Points_across_a_peak/"
-fig_path <- 
-  "C:/Users/lukwolt/Documents/R/Points_across_a_peak/Figures/"
+library("ggpubr")
+library("patchwork")
+library("ghibli")
+library("reprex")
+library("ggh4x")
+library("ggplot2")
+lit_path <-"C:/Users/lukwolt/Documents/R/LIT/"
+ot_path <-"C:/Users/lukwolt/Documents/R/OT/"
+pp_path <- "C:/Users/lukwolt/Documents/R/Points_across_a_peak/"
+fig_path <- "C:/Users/lukwolt/Documents/R/Points_across_a_peak/Figures/"
+  
+ghibli_palettes$YesterdayMedium
 ```
 
 # Load packages
