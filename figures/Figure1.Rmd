@@ -20,7 +20,7 @@ Figure 1. Comparison between an Orbitrap Mass Analyser and Linear Ion Trap Mass 
 library("tidyverse")
 library("ggpubr")
 library("patchwork")
-library("ghibli")
+library("ggpointdensity")
 ```
 
 # Load data
