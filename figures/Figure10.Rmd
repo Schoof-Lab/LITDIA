@@ -1,0 +1,126 @@
+---
+title: "Figure 10"
+author: "Lukas Woltereck"
+date: '2022-06-23'
+output: html_document
+---
+
+# Fig. 10 Dynamic range of quantified peptides from LCM tonsil tissue with a 52500 µm2 surface area. 
+
+Samu
+
+# Load packages
+
+```{r}
+library("tidyverse")
+library("patchwork")
+library("ggpointdensity")
+library("kableExtra")
+library("robustbase")
+library("ggrepel")
+```
+
+# Load Path
+
+Paths from the computer, where the data files are saved, are loaded. To reproduce it, they need to be changed to the actual order of the files.
+
+```{r}
+#lit_path <-"C:/Users/lukwolt/Documents/R/LIT/"
+#ot_path <-"C:/Users/lukwolt/Documents/R/OT/"
+#pp_path <- "C:/Users/lukwolt/Documents/R/Points_across_a_peak/"
+```
+
+```{r}
+filter_pep2 <- function(x) {
+  x$FG.Quantity[as.logical(x$EG.IsImputed)] <- NA
+  y <- x %>% 
+  group_by(R.FileName, PEP.StrippedSequence, PG.ProteinGroups) %>% 
+  summarise(mean_quantity = mean(FG.Quantity, na.rm = TRUE)) %>%  
+  pivot_wider(names_from = R.FileName, 
+              values_from = mean_quantity) %>%
+    suppressMessages()
+  z <- y %>% 
+    as.data.frame() %>% 
+  mutate(na_nbr = rowSums(is.na(y[-c(1:2)]))) %>%
+  mutate(mean_quantity = rowMeans(y[3:ncol(y)], na.rm = TRUE)) %>%
+  mutate(filtered = !na_nbr <= 1) %>% 
+  select(-na_nbr) %>% 
+  suppressMessages("`summarise()` has grouped output by 'R.FileName'. You can override using the `.groups` argument.")
+  message("
+Highlighted ", sum(z$filtered) , " peptide(s) found in less than ", ncol(y) -2, " replicates")
+  
+  return(z)
+}
+```
+
+
+```{r}
+LITDIA_Enhanced_20SPD_DVP_188 <- read.csv2(paste0(lit_path, "190141_HB_TP_Evo_Whisper100_20SPD_LITDIA_1CV-45_Enhanced_auto_DVP_188.csv"))
+LITDIA_Enhanced_20SPD_DVP_375 <- read.csv2(paste0(lit_path, "190203_HB_TP_Evo_Whisper100_20SPD_LITDIA_1CV-45_Enhanced_auto_DVP_375.csv"))
+LITDIA_Enhanced_20SPD_DVP_750 <- read.csv2(paste0(lit_path, "190111_HB_TP_Evo_Whisper100_20SPD_LITDIA_1CV-45_Enhanced_auto_DVP_750.csv"))
+LITDIA_Enhanced_20SPD_DVP_1500 <- read.csv2(paste0(lit_path, "190043_HB_TP_Evo_Whisper100_20SPD_LITDIA_1CV-45_Enhanced_auto_DVP_1500.csv"))
+LITDIA_Enhanced_20SPD_DVP_3000 <- read.csv2(paste0(lit_path, "190018_HB_TP_Evo_Whisper100_20SPD_LITDIA_1CV-45_Enhanced_auto_DVP_3000.csv"))
+LITDIA_Enhanced_20SPD_DVP_6000 <- read.csv2(paste0(lit_path, "190226_HB_TP_Evo_Whisper100_20SPD_LITDIA_1CV-45_Enhanced_auto_DVP_6000.csv"))
+```
+
+
+```{r}
+accession <- LITDIA_Enhanced_20SPD_DVP_750$PG.ProteinAccessions[grep("P20963|P07766|P15391", LITDIA_Enhanced_20SPD_DVP_750$PG.ProteinAccessions)]
+#CD19 P15391
+#CD3Z P20963
+#CD3E P07766
+```
+
+```{r}
+LITDIA_Enhanced_20SPD_DVP_750_1 <- filter_pep2(LITDIA_Enhanced_20SPD_DVP_750)
+```
+
+```{r}
+a <- LITDIA_Enhanced_20SPD_DVP_750_1 %>% 
+  group_by(PG.ProteinGroups) %>%
+  summarise(prot_quantity = median(mean_quantity))
+temp <- a %>%
+  arrange(desc(prot_quantity)) %>% 
+  mutate(rank = as.numeric(as.factor(dplyr::desc(prot_quantity))),
+         marker = PG.ProteinGroups %in% accession)
+temp$marker %>% table()
+mark <- temp[temp$marker == TRUE,]
+mark$prot <- c("CD3E", "CD19", "CD3Z")
+C <- ggplot()+
+  geom_point(data = temp, 
+                 aes(x = rank, 
+                 y = prot_quantity,
+                 color =  !marker),
+             size = 3)+
+  scale_color_manual(values = c("#FF2020", "grey10"),
+                     labels = c("Lymphocytes markers", "Other proteins"))+
+  geom_point(data = temp[temp$marker == TRUE,],
+             aes(x = rank, 
+                 y = prot_quantity),
+             color = "#FF2020",
+             size = 3.5)+
+  labs(x = "Abundance rank",
+       y = "LFQ intensity",
+       color = "Proteins")+
+  scale_y_log10()+
+  theme(axis.text = element_text(size = 24),
+        axis.title = element_text(size = 27),
+        axis.text.x = element_text(hjust = 0.62),
+        axis.title.y = element_text(vjust = 2.2),
+        legend.title = element_text(size = 27),
+        legend.text = element_text(size = 22),
+        legend.key.size = unit(0.9, "cm"),
+        axis.title.x = element_text(vjust = -1),
+        plot.margin = margin(b = 20,
+                             l = 20))+
+  geom_label_repel(data = mark,
+            aes(x = rank, y = prot_quantity, 
+                label = prot),
+            direction = "y",
+            nudge_y = 0.25,
+            size = 6)
+
+#cairo_pdf(filename = "fig10.pdf", width = 12.5, height = 6.77)
+#rank_plot
+#dev.off()
+```
