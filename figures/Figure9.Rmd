@@ -1,0 +1,213 @@
+---
+title: "Figure 9"
+author: "Lukas Woltereck"
+date: '2022-06-22'
+output: html_document
+---
+
+# Figure 9: Comparison of the number of identified peptides and protein groups from different sizes of LCM surface areas
+
+To compare the identified peptides of clinical samples from the LC slides with HeLa cells in *Enhanced* scanning mode and on auto injection time, a stacked plot was used. The groups of identified proteins were visualized with a line plot.
+
+# Load packages
+
+```{r}
+library("tidyverse")
+library("psych")
+library("pheatmap")
+library("ggpubr")
+library("patchwork")
+library("ghibli")
+library("reprex")
+library("ggh4x")
+library("ggplot2")
+```
+
+# Load Path
+
+Paths from the computer, where the data files are saved, are loaded. To reproduce it, they need to be changed to the actual order of the files.
+
+```{r}
+lit_path <-"C:/Users/lukwolt/Documents/R/LIT/"
+ot_path <-"C:/Users/lukwolt/Documents/R/OT/"
+pp_path <- "C:/Users/lukwolt/Documents/R/Points_across_a_peak/"
+
+ghibli_palettes$YesterdayMedium
+```
+
+# Load Data
+
+All data needed for this figure are loaded. So that for further steps it is easier to read back the needed data.
+
+```{r}
+#188
+LITDIA_Enhanced_20SPD_45w_188 <- read.csv2(paste0(lit_path, "190141_HB_TP_Evo_Whisper100_20SPD_LITDIA_1CV-45_Enhanced_auto_DVP_188.csv"))
+#375
+LITDIA_Enhanced_20SPD_45w_375 <- read.csv2(paste0(lit_path, "190203_HB_TP_Evo_Whisper100_20SPD_LITDIA_1CV-45_Enhanced_auto_DVP_375.csv"))
+#750
+LITDIA_Enhanced_20SPD_45w_750 <- read.csv2(paste0(lit_path, "190111_HB_TP_Evo_Whisper100_20SPD_LITDIA_1CV-45_Enhanced_auto_DVP_750.csv"))
+#1500
+LITDIA_Enhanced_20SPD_45w_1500 <- read.csv2(paste0(lit_path, "190043_HB_TP_Evo_Whisper100_20SPD_LITDIA_1CV-45_Enhanced_auto_DVP_1500.csv"))
+#3000
+LITDIA_Enhanced_20SPD_45w_3000 <- read.csv2(paste0(lit_path, "190018_HB_TP_Evo_Whisper100_20SPD_LITDIA_1CV-45_Enhanced_auto_DVP_3000.csv"))
+#6000
+LITDIA_Enhanced_20SPD_45w_6000 <- read.csv2(paste0(lit_path, "190226_HB_TP_Evo_Whisper100_20SPD_LITDIA_1CV-45_Enhanced_auto_DVP_6000.csv"))
+```
+
+# Compute CV
+
+```{r}
+compute_CV <- function(x){
+  y <- x %>% 
+    mutate(sd = apply(x[, 2:(ncol(x)-2)],
+                      FUN = sd, MARGIN =  1, na.rm = TRUE),
+           CV = sd/mean_quantity)
+  colnames(y)[2:(ncol(x)-2)] <- paste0("S", 1:(ncol(x)-3))
+  if(ncol(x) <= 6){
+  y$S4 <- NA
+ }
+  return(y)
+}
+```
+
+# Filter peptides
+
+The function filter_pep removes all peptides that are found in less than three replicates.
+
+```{r}
+filter_pep <- function(x) {
+  x$FG.Quantity[as.logical(x$EG.IsImputed)] <- NA
+  y <- x %>% 
+  group_by(R.FileName, PEP.StrippedSequence) %>% 
+  summarise(mean_quantity = mean(FG.Quantity, na.rm = TRUE)) %>%  
+  pivot_wider(names_from = R.FileName, 
+              values_from = mean_quantity) %>%
+    suppressMessages()
+  z <- y %>% 
+  mutate(na_nbr = rowSums(is.na(y[-1]))) %>%
+  mutate(mean_quantity = rowMeans(y[2:ncol(y)], na.rm = TRUE)) %>%
+  mutate(filtered = !na_nbr <= 1) %>% 
+  select(-na_nbr) %>% 
+  suppressMessages("`summarise()` has grouped output by 'R.FileName'. You can override using the `.groups` argument.")
+  message("
+Highlighted ", sum(z$filtered) , " peptide(s) found in less than ", ncol(y) -2, " replicates")
+  
+  return(z)
+}
+```
+
+```{r}
+#188
+LITDIA_Enhanced_20SPD_45w_188_cv <- compute_CV(filter_pep(LITDIA_Enhanced_20SPD_45w_188))
+LITDIA_Enhanced_20SPD_45w_188_cv$input<- "13 160"
+#375
+LITDIA_Enhanced_20SPD_45w_375_cv <- compute_CV(filter_pep(LITDIA_Enhanced_20SPD_45w_375))
+LITDIA_Enhanced_20SPD_45w_375_cv$input<- "26 250"
+#750
+LITDIA_Enhanced_20SPD_45w_750_cv <- compute_CV(filter_pep(LITDIA_Enhanced_20SPD_45w_750))
+LITDIA_Enhanced_20SPD_45w_750_cv$input<- "52 500"
+#1500
+LITDIA_Enhanced_20SPD_45w_1500_cv <- compute_CV(filter_pep(LITDIA_Enhanced_20SPD_45w_1500))
+LITDIA_Enhanced_20SPD_45w_1500_cv$input<- "105 000"
+#3000
+LITDIA_Enhanced_20SPD_45w_3000_cv <- compute_CV(filter_pep(LITDIA_Enhanced_20SPD_45w_3000))
+LITDIA_Enhanced_20SPD_45w_3000_cv$input<- "210 000"
+#6000
+LITDIA_Enhanced_20SPD_45w_6000_cv <- compute_CV(filter_pep(LITDIA_Enhanced_20SPD_45w_6000))
+LITDIA_Enhanced_20SPD_45w_6000_cv$input<- "420 000"
+```
+
+# Join
+
+To visualize all data in a plot, they have to be merged in a table. The function "rbind()" combines all data. `figure9$CV_filter[figure9$CV < 0.1] <- "3"` shows all peptides with a CV under 0.1, `figure9$CV_filter[figure9$CV >= 0.1 & figure9$CV <= 0.15] <- "2"` presents all peptides with a CV between 0.1 and 0.15 and at least `figure9$CV_filter[figure9$CV > 0.15] <- "1"` shows all peptides with a CV over 0.15. Afterwards all peptides that are not found in each replicate are removed.
+
+```{r}
+figure9 <- 
+  rbind(LITDIA_Enhanced_20SPD_45w_188_cv, LITDIA_Enhanced_20SPD_45w_375_cv, LITDIA_Enhanced_20SPD_45w_750_cv, LITDIA_Enhanced_20SPD_45w_1500_cv, LITDIA_Enhanced_20SPD_45w_3000_cv, LITDIA_Enhanced_20SPD_45w_6000_cv)
+figure9$input %>% table() 
+figure9$input <- factor(figure9$input, 
+                          levels = unique(figure9$input))
+figure9$CV_filter <- NA
+figure9$CV_filter[figure9$CV < 0.1] <- "3"
+figure9$CV_filter[figure9$CV >= 0.1 & figure9$CV <= 0.15] <- "2"
+figure9$CV_filter[figure9$CV > 0.15] <- "1"
+figure9 <- figure9 %>%
+  filter(!is.na(CV_filter)) %>% 
+  group_by(input, CV_filter) %>% 
+  summarise(id_S1 = sum(!is.na(S1)),
+            id_S2 = sum(!is.na(S2)),
+            id_S3 = sum(!is.na(S3)),
+            id_S4 = sum(!is.na(S4)))
+figure9$id_S4[figure9$id_S4 == 0] <- NA 
+figure9$mean_id <- rowMeans(figure9[3:5], na.rm = TRUE)
+figure9$sd_id <- apply(figure9[3:5], FUN =  sd, MARGIN = 1, na.rm = TRUE)
+```
+
+## Table for proteins
+
+To find the proteins in the table
+
+```{r}
+prots_dvp <-  rbind(LITDIA_Enhanced_20SPD_45w_188, LITDIA_Enhanced_20SPD_45w_375, LITDIA_Enhanced_20SPD_45w_750, LITDIA_Enhanced_20SPD_45w_1500, LITDIA_Enhanced_20SPD_45w_3000, LITDIA_Enhanced_20SPD_45w_6000)
+prots_dvp <- prots_dvp %>% 
+  group_by(R.FileName, R.Replicate, PG.ProteinGroups) %>% 
+  summarise(med_quantity = median(FG.Quantity, na.rm = TRUE)) %>% 
+  group_by(R.FileName, R.Replicate) %>% 
+  summarise(id = n()) %>% 
+  mutate(R.FileName = sub("_0.", "", R.FileName)) %>% 
+  group_by(R.FileName) %>% 
+  summarise(mean_id = mean(id),
+            sd_id = sd(id))
+prots_dvp$x <- c("105 000", "13 160", "210 000",  "26 250", "420 000","52 500")
+```
+
+# Plot
+
+```{r}
+figure9$y_errorbar <- figure9$mean_id
+figure9$y_errorbar[figure9$CV_filter == "1"] <-
+  figure9$y_errorbar[figure9$CV_filter == "1"] +
+  figure9$y_errorbar[figure9$CV_filter == "2"]+
+  figure9$y_errorbar[figure9$CV_filter == "3"]
+figure9$y_errorbar[figure9$CV_filter == "2"] <-
+  figure9$y_errorbar[figure9$CV_filter == "2"]+
+  figure9$y_errorbar[figure9$CV_filter == "3"]
+stacked_plot <-
+  ggplot()+
+  geom_col(data = figure9, 
+           aes(x = input, y = mean_id, fill = CV_filter),
+           width = 0.7) +
+  labs(x = "Surface area [µm²]",
+       y = "Identified peptides/proteins",
+       fill = "CV") +
+  theme_bw() +
+  theme(axis.text = element_text(size = 24),
+        axis.title = element_text(size = 27),
+        strip.text = element_text(size = 27),
+        strip.background = element_rect(fill = "#E5E4F7"),
+        axis.title.y = element_text(vjust = 2.2),
+        axis.text.x = element_text(angle = 90, vjust = 0.3, hjust = 1),
+        legend.title = element_blank(),
+        axis.title.x = element_text(vjust = 0.2),
+        legend.text = element_text(size = 27),
+        legend.key.size = unit(0.9, "cm"))+
+  scale_fill_manual(values = c("grey82", "#FF9090", "#FF3030"),
+                    labels = c("Peptides [CV \U2265 15%]", "Peptides [CV 10 - 15%]", "Peptides [CV < 10%]" ))+
+  geom_errorbar(data = figure9, 
+           aes(x = input,
+               y = mean_id,
+               ymin = y_errorbar - sd_id, 
+                         ymax = y_errorbar + sd_id),
+                    width = 0.2,
+                    size = 1)+
+  geom_point(data = prots_dvp, aes(x = x, y = mean_id),
+             color = "#527DCE",
+             size = 4) +
+    geom_line(data = prots_dvp, aes(x = x, y = mean_id, group = 1, color = "Proteins"),
+              size = 2.5)+
+    scale_color_manual(values = c("#527DCE"))
+  
+#cairo_pdf(filename = "fig8.pdf", width = 14.58, height = 7.81)
+#stacked_plot
+#dev.off()
+```
