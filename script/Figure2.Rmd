@@ -1,5 +1,5 @@
 ---
-title: "Figure2"
+title: "Fig. 2 Comparison of windowing scheme"
 autor: "Samuel Grégoire & Lukas R. Woltereck"
 output:
   html_document:
@@ -18,7 +18,6 @@ output:
 
 ```{r}
 library("tidyverse")
-library("patchwork")
 ```
 
 # Fig. 2 Comparison of windowing scheme
@@ -89,7 +88,7 @@ LITDIA_Normal_45w_100 <- read.csv2(paste0(lit_path, "20220509_LIT_Normal_DIA_100
 
 # Clean data tables
 
-Imported tables contain a lot of information, which are not useful for our analysis. The function `filter_pep()` only keeps the file names (replicates), quantitative values for each file name, and the peptide sequence. It also calculates the mean between the four replicates. Spectronaut does some imputation by default , but it is necessary to keep missing values. Imputed values are replaced by NA. Peptides missing in more than one replicate are highlighted as TRUE.
+Imported tables contain a lot of information, which are not useful for our analysis. The function `filter_pep()` only keeps the file names (replicates), quantitative values for each file name, and the peptide sequence. It also calculates the mean between the four replicates. Spectronaut does some imputation by default, but we want to keep missing values. Imputed values are replaced by NA. Peptides missing in more than one replicate are highlighted as TRUE.
 
 ```{r}
 filter_pep <- function(x) {
@@ -112,54 +111,36 @@ filter_pep <- function(x) {
 
 ```
 
-The `filter_pep()` function is used for every data-set. Furthermore a "filter" data-set is created by removing all peptides missing in more than one replicate.
+The `filter_pep()` function is used for every data-set.
 
 20 SPD
 1 ng
 ```{r}
-#34w
 LITDIA_Normal_20SPD_34w_1 <-  filter_pep(LITDIA_Normal_20SPD_34w_1)
-LITDIA_Normal_20SPD_34w_1_filter <- LITDIA_Normal_20SPD_34w_1[LITDIA_Normal_20SPD_34w_1$filtered == FALSE, ]
-#40w
 LITDIA_Normal_20SPD_40w_1 <-  filter_pep(LITDIA_Normal_20SPD_40w_1)
-LITDIA_Normal_20SPD_40w_1_filter <- LITDIA_Normal_20SPD_40w_1[LITDIA_Normal_20SPD_40w_1$filtered == FALSE, ]
-#45w
 LITDIA_Normal_20SPD_45w_1 <-  filter_pep(LITDIA_Normal_20SPD_45w_1)
-LITDIA_Normal_20SPD_45w_1_filter <- LITDIA_Normal_20SPD_45w_1[LITDIA_Normal_20SPD_45w_1$filtered == FALSE, ]
 ```
 
 100 ng
 ```{r}
-#34w
 LITDIA_Normal_20SPD_34w_100 <-  filter_pep(LITDIA_Normal_20SPD_34w_100)
-LITDIA_Normal_20SPD_34w_100_filter <- LITDIA_Normal_20SPD_34w_100[LITDIA_Normal_20SPD_34w_100$filtered == FALSE, ]
-#40w
 LITDIA_Normal_20SPD_40w_100 <-  filter_pep(LITDIA_Normal_20SPD_40w_100)
-LITDIA_Normal_20SPD_40w_100_filter <- LITDIA_Normal_20SPD_40w_100[LITDIA_Normal_20SPD_40w_100$filtered == FALSE, ]
-#45w
 LITDIA_Normal_20SPD_45w_100 <-  filter_pep(LITDIA_Normal_20SPD_45w_100)
-LITDIA_Normal_20SPD_45w_100_filter <- LITDIA_Normal_20SPD_45w_100[LITDIA_Normal_20SPD_45w_100$filtered == FALSE, ]
 ```
 
 40 SPD 
 1 ng
 ```{r}
 LITDIA_Normal_34w_1 <-  filter_pep(LITDIA_Normal_34w_1)
-LITDIA_Normal_34w_1_filter <- LITDIA_Normal_34w_1[LITDIA_Normal_34w_1$filtered == FALSE, ]
 LITDIA_Normal_40w_1 <-  filter_pep(LITDIA_Normal_40w_1)
-LITDIA_Normal_40w_1_filter <- LITDIA_Normal_40w_1[LITDIA_Normal_40w_1$filtered == FALSE, ]
 LITDIA_Normal_45w_1 <-  filter_pep(LITDIA_Normal_45w_1)
-LITDIA_Normal_45w_1_filter <- LITDIA_Normal_45w_1[LITDIA_Normal_45w_1$filtered == FALSE, ]
 ```
 
 100 ng
 ```{r}
 LITDIA_Normal_34w_100 <-  filter_pep(LITDIA_Normal_34w_100)
-LITDIA_Normal_34w_100_filter <- LITDIA_Normal_34w_100[LITDIA_Normal_34w_100$filtered == FALSE, ]
 LITDIA_Normal_40w_100 <-  filter_pep(LITDIA_Normal_40w_100)
-LITDIA_Normal_40w_100_filter <- LITDIA_Normal_40w_100[LITDIA_Normal_40w_100$filtered == FALSE, ]
 LITDIA_Normal_45w_100 <-  filter_pep(LITDIA_Normal_45w_100)
-LITDIA_Normal_45w_100_filter <- LITDIA_Normal_45w_100[LITDIA_Normal_45w_100$filtered == FALSE, ]
 ```
 
 ## Number of identified peptides
@@ -173,7 +154,7 @@ id_LITDIA_Normal_20SPD_34w_1 <- id_LITDIA_Normal_20SPD_40w_1 <-
   id_LITDIA_Normal_34w_100 <- id_LITDIA_Normal_40w_100 <- id_LITDIA_Normal_45w_100 <- rep(NA, 4)
 ```
 
-The identified peptides, that are not NA, are summed for each replicate and replace the empty vectors.
+The numbers of identified peptides are counted by summing non-missing values for each replicate and stored in the vectors created above.
 
 20 SPD 
 1 ng
