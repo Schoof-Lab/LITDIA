@@ -1,5 +1,5 @@
 ---
-title: "Figure1"
+title: "Fig. 1 Comparison between an Orbitrap Mass analyzer and Linear Ion Trap Mass Analyzer on low-input proteomics"
 autor: "Samuel Grégoire & Lukas R. Woltereck"
 output:
   html_document:

@@ -16,9 +16,12 @@ output:
 
 # Load packages
 
-```{r}
+```{r, message=FALSE}
 library("tidyverse")
 library("patchwork")
+
+#set bw theme as default theme
+theme_set(theme_bw())
 ```
 
 # Fig. 4 Comparison of Injection Time on Linear Ion Trap Mass Analyzer
@@ -694,4 +697,10 @@ figure4
 cairo_pdf(filename = "Fig. 4 Comparison of Injection Time on Linear Ion Trap Mass Analyzer.pdf", width = 20.83, height = 15.625)
 figure4
 dev.off()
+```
+
+# Session information
+
+```{r, echo = FALSE}
+sessionInfo()
 ```

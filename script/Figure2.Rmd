@@ -14,15 +14,16 @@ output:
     fig_crop: no
 ---
 
+Comparison of the number of identified peptides on DIA-LIT-based method on Normal scanning mode for WhisperTM 100 20 SPD from 1 ng of tryptic HeLa lysate with different ITs at fixed 40 isolation windows. Identified peptides with a coefficient of variation (CV) between 10% and 15% are colored with light red and those with a CV below 10% with dark red. The cycle times for the methods are indicated by their injection times: 38 ms 2.4 s, for 60 ms 3.28 s, for 80 ms 4.09 s, and for 100 ms 4.91 s.
+
 # Load packages
 
-```{r}
+```{r, message=FALSE}
 library("tidyverse")
+
+#set bw theme as default theme
+theme_set(theme_bw())
 ```
-
-# Fig. 2 Comparison of windowing scheme
-
-Comparison of the number of identified peptides on DIA-LIT-based method on Normal scanning mode for WhisperTM 100 20 SPD from 1 ng of tryptic HeLa lysate with different ITs at fixed 40 isolation windows. Identified peptides with a coefficient of variation (CV) between 10% and 15% are colored with light red and those with a CV below 10% with dark red. The cycle times for the methods are indicated by their injection times: 38 ms 2.4 s, for 60 ms 3.28 s, for 80 ms 4.09 s, and for 100 ms 4.91 s.
 
 # Load data
 
