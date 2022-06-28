@@ -97,7 +97,7 @@ OTDIA_30k_100 <- read.csv2(paste0(ot_path, "20220425_OT_30k_DIA_100ng_40SPD_whis
 
 # Clean data tables
 
-Imported tables contain a lot of information, which are not useful for our analysis. The function `filter_pep()` only keeps the file names (replicates), quantitative values for each file name, and the peptide sequence. It is also calculating the mean between the four replicates. Spectronaut does some imputation by default, but we want to keep missing values. Imputed values are replaced by NA. Peptides missing in more than one replicate are highlighted as TRUE.
+Imported tables contain a lot of information, which are not useful for our analysis. The function `filter_pep()` only keeps the file names (replicates), quantitative values for each file name, and the peptide sequence. It also calculates the mean between the four replicates. Spectronaut does some imputation by default, but we want to keep missing values. Imputed values are replaced by NA. Peptides missing in more than one replicate are highlighted as TRUE.
 
 ```{r}
 filter_pep <- function(x) {
@@ -121,7 +121,7 @@ Highlighted ", sum(z$filtered) , " peptide(s) found in less than ", ncol(y) -2, 
 }
 ```
 
-The `filter_pep()` function is used for every data-set. Furthermore a "filter" data-set was created by removing all peptides missing in more than one replicate.
+The `filter_pep()` function is used for every data-set. Furthermore a "filter" data-set is created by removing all peptides missing in more than one replicate.
 
 1 ng
 
@@ -347,7 +347,7 @@ id_pep <- data.frame(method = rep(c(rep("OT 7.5k", 4), rep("OT 15k", 4), rep("OT
                   id_OTDIA_7k_10, id_OTDIA_15k_10, id_OTDIA_30k_10, 
                   id_LITDIA_Turbo_10, id_LITDIA_Rapid_10, id_LITDIA_Normal_10,
                   id_OTDIA_7k_100, id_OTDIA_15k_100, id_OTDIA_30k_100, 
-                  id_LITDIA_Turbo_100, id_LITDIA_Rapi_d_100, id_LITDIA_Normal_100),
+                  id_LITDIA_Turbo_100, id_LITDIA_Rapid_100, id_LITDIA_Normal_100),
            input = c(rep("1 ng", 24), rep("5 ng", 24), rep("10 ng", 24), rep("100 ng", 24)))
 
 # Factorise to set order
@@ -359,7 +359,7 @@ id_pep$input <- factor(id_pep$input, levels = unique(id_pep$input))
 
 The mean and standard deviation is calculated for the replicates of each method. Both are plotted in a line plot using `ggplot2`. Error bars representing the standard deviation are displayed using `geom_errorbar()`.
 
-```{r}
+```{r, fig.width=7, fig.height=8}
 figure1a <- id_pep %>% 
   group_by(method, input) %>% 
   summarise(mean_id = mean(id),
@@ -474,8 +474,7 @@ OTDIA_7k_5_CV$method <- "OT 7k"
 OTDIA_7k_5_CV$input<- "5 ng"
 
 OTDIA_15k_5_CV <- compute_CV(OTDIA_15k_5)
-OTDIA_15k_5_CV$method <- "OT 15k
-"
+OTDIA_15k_5_CV$method <- "OT 15k"
 OTDIA_15k_5_CV$input<- "5 ng"
 OTDIA_30k_5_CV <- compute_CV(OTDIA_30k_5)
 OTDIA_30k_5_CV$method <- "OT 30k"
@@ -602,7 +601,7 @@ CV_joined$sd_id <- apply(CV_joined[4:7], FUN =  sd, MARGIN = 1, na.rm = TRUE)
 
 The mean and the standard deviation of identified peptides for each CV_filter and method are plotted in a stacked col plot using `ggplot2`. Error bars representing the standard deviation are displayed using `geom_errorbar()`. Due to the "stacked" aspect of the col plot, error bars y position is ajusted by using the y_errorbar variable instead of the mean_id.
 
-```{r}
+```{r, fig.width=11, fig.height= 9}
 CV_joined$y_errorbar <- CV_joined$mean_id
 CV_joined$y_errorbar[CV_joined$CV_filter == "1"] <- 
   CV_joined$y_errorbar[CV_joined$CV_filter == "1"] +
@@ -789,7 +788,7 @@ figure1c_join$input <- factor(figure1c_join$input,
 
 LIT and OT abundances are plotted against each other in a scatter plot using `ggplot2`. The functions `geom_smooth()`and `stat_cor()` were used to add a regression line and its coefficient of correlation to the plot. Numbers of peptides found in both LIT and OT are also displayed using `geom_text`. Logarithmic scale was used for both x and y axis.
 
-```{r}
+```{r, fig.width=16, fig.height=9, warning=FALSE, message=FALSE}
 figure1c <- figure1c_join %>% 
   ggplot(aes(x = mean_quantity_OT, y = mean_quantity_LIT)) +
   geom_pointdensity(size = 1.5)+
@@ -1003,7 +1002,7 @@ figure1d_join$input <- factor(figure1d_join$input,
 
 LIT abundances for peptides found in LIT only (grey) or in both LIT and OT (red) are plotted in a histogram using `ggplot2`. Numbers of peptides found in both LIT only (grey) and bot LIT and OT (red) are displayed using `geom_text`. Logarithmic scale was used for x axis.
 
-```{r}
+```{r, fig.width=16, fig.height=9, warning=FALSE, message=FALSE}
 figure1d <- figure1d_join %>% 
   ggplot(aes(x = mean_quantity, fill = in_OT))+
   geom_histogram(bins = 40,
@@ -1142,15 +1141,22 @@ figure1d
 
 Plot 1A, 1B, 1C and 1D are combined using patchwork to create figure 1 and save it as pdf.
 
-```{r, fig.width=20, fig.height= 26}
+```{r, fig.width=20, fig.height= 26, message = FALSE}
 temp <- figure1a +  figure1b + plot_layout(widths = c(1, 2))
 temp2 <- plot_spacer() + figure1c + plot_spacer() + plot_layout(widths = c(1, 10, 1))
 temp3 <- plot_spacer() + figure1d + plot_spacer() + plot_layout(widths = c(1, 10, 1))
 figure1 <- temp/temp2/temp3 + plot_layout(heights = c(0.8, 1, 1))
-
 figure1
+
 #Save as pdf
 cairo_pdf(filename = "fig1.pdf", width = 20.83, height = 27.08)
 figure1
 dev.off()
 ```
+
+# Session information
+
+```{r, echo = FALSE}
+sessionInfo()
+```
+
