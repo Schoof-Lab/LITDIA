@@ -1,5 +1,6 @@
-Figure1
+Fig.-1-Comparison-between-an-Orbitrap-Mass-analyzer-and-Linear-Ion-Trap-Mass-Analyzer-on-low-input-proteomics.md
 ================
+Samuel Grégoire & Lukas R. Woltereck
 
 Figure 1. Comparison between an Orbitrap Mass Analyser and Linear Ion
 Trap Mass Analyser on low-input proteomics.
@@ -22,61 +23,51 @@ The path to every folder used is stored to keep everything compact. LIT
 data is stored in the folder located in lit_path and OT data in ot_path.
 
 ``` r
-#lit_path <-"C:/Users/lukwolt/Documents/R/LIT/"
-#ot_path <-"C:/Users/lukwolt/Documents/R/OT/"
+#lit_path <- "C:/Data/LIT/"
+#ot_path <- "C:/Data/OT/"
 ```
 
 Data tables were exported from Spectronaut in csv files and need to be
 loaded in R.
 
-LIT Turbo DIA
+## LIT
 
 ``` r
+#Turbo
 LITDIA_Turbo_1 <- read.csv2(paste0(lit_path, "20220502_LIT_Turbo_DIA_1ng_40SPD_whisper100_1CV_auto.csv"))
 LITDIA_Turbo_5 <- read.csv2(paste0(lit_path, "20220502_LIT_Turbo_DIA_5ng_40SPD_whisper100_1CV_auto.csv"))
 LITDIA_Turbo_10 <- read.csv2(paste0(lit_path, "20220502_LIT_Turbo_DIA_10ng_40SPD_whisper100_1CV_auto.csv"))
 LITDIA_Turbo_100 <- read.csv2(paste0(lit_path, "20220502_LIT_Turbo_DIA_100ng_40SPD_whisper100_1CV_auto.csv"))
-```
 
-LIT Rapid DIA
-
-``` r
+# Rapid
 LITDIA_Rapid_1 <- read.csv2(paste0(lit_path, "20220421_LIT_Rapid_DIA_1ng_40SPD_whisper100_1CV_auto.csv"))
 LITDIA_Rapid_5 <- read.csv2(paste0(lit_path, "20220502_LIT_Rapid_DIA_5ng_40SPD_whisper100_1CV_auto.csv"))
 LITDIA_Rapid_10 <- read.csv2(paste0(lit_path, "20220502_LIT_Rapid_DIA_10ng_40SPD_whisper100_1CV_auto.csv"))
 LITDIA_Rapid_100 <- read.csv2(paste0(lit_path, "20220421_LIT_Rapid_DIA_100ng_40SPD_whisper100_1CV_auto.csv"))
-```
 
-LIT Normal DIA
-
-``` r
+#Normal
 LITDIA_Normal_1 <- read.csv2(paste0(lit_path, "20220421_LIT_Normal_DIA_1ng_40SPD_whisper100_1CV_auto.csv"))
 LITDIA_Normal_5 <- read.csv2(paste0(lit_path, "20220502_LIT_Normal_DIA_5ng_40SPD_whisper100_1CV_auto.csv"))
 LITDIA_Normal_10 <- read.csv2(paste0(lit_path, "20220502_LIT_Normal_DIA_10ng_40SPD_whisper100_1CV_auto.csv"))
 LITDIA_Normal_100 <- read.csv2(paste0(lit_path, "20220421_LIT_Normal_DIA_100ng_40SPD_whisper100_1CV_auto.csv"))
 ```
 
-OT 7.5k DIA
+## OT
 
 ``` r
+#7.5k
 OTDIA_7k_1 <- read.csv2(paste0(ot_path, "20220421_OT_7k_DIA_1ng_40SPD_whisper100_1CV.csv"))
 OTDIA_7k_5 <- read.csv2(paste0(ot_path, "20220502_OT_7k_DIA_5ng_40SPD_whisper100_1CV.csv"))
 OTDIA_7k_10 <- read.csv2(paste0(ot_path, "20220502_OT_7k_DIA_10ng_40SPD_whisper100_1CV.csv"))
 OTDIA_7k_100 <- read.csv2(paste0(ot_path, "20220421_OT_7k_DIA_100ng_40SPD_whisper100_1CV.csv"))
-```
 
-OT 15k DIA
-
-``` r
+#15k
 OTDIA_15k_1 <- read.csv2(paste0(ot_path, "20220421_OT_15k_DIA_1ng_40SPD_whisper100_1CV.csv"))
 OTDIA_15k_5 <- read.csv2(paste0(ot_path, "20220509_OT_15k_DIA_5ng_40SPD_whisper100_1CV.csv"))
 OTDIA_15k_10 <- read.csv2(paste0(ot_path, "20220502_OT_15k_DIA_10ng_40SPD_whisper100_1CV.csv"))
 OTDIA_15k_100 <- read.csv2(paste0(ot_path, "20220425_OT_15k_DIA_100ng_40SPD_whisper100_1CV.csv"))
-```
 
-OT 30k DIA
-
-``` r
+#30k
 OTDIA_30k_1 <- read.csv2(paste0(ot_path, "20220421_OT_30k_DIA_1ng_40SPD_whisper100_1CV.csv"))
 OTDIA_30k_5 <- read.csv2(paste0(ot_path, "20220509_OT_30k_DIA_5ng_40SPD_whisper100_1CV.csv"))
 OTDIA_30k_10 <- read.csv2(paste0(ot_path, "20220502_OT_30k_DIA_10ng_40SPD_whisper100_1CV.csv"))
@@ -96,29 +87,31 @@ highlighted (TRUE) in the “filtered” column
 ``` r
 filter_pep <- function(x) {
   x$FG.Quantity[as.logical(x$EG.IsImputed)] <- NA
-  y <- x %>% 
+  x_clean_with_mean <- x %>% 
   group_by(R.FileName, PEP.StrippedSequence) %>% 
   summarise(mean_quantity = mean(FG.Quantity, na.rm = TRUE)) %>%  
   pivot_wider(names_from = R.FileName, 
               values_from = mean_quantity) %>%
     suppressMessages()
-  z <- y %>% 
-  mutate(na_nbr = rowSums(is.na(y[-1]))) %>%
-  mutate(mean_quantity = rowMeans(y[2:ncol(y)], na.rm = TRUE)) %>%
+  x_filter_highlight <- x_clean_with_mean %>% 
+  mutate(na_nbr = rowSums(is.na(x_clean_with_mean[-1]))) %>%
+  mutate(mean_quantity = 
+           rowMeans(x_clean_with_mean[2:ncol(x_clean_with_mean)], 
+                    na.rm = TRUE)) %>%
   mutate(filtered = !na_nbr <= 1) %>% 
   select(-na_nbr) %>% 
   suppressMessages("`summarise()` has grouped output by 'R.FileName'. You can override using the `.groups` argument.")
   message("
-Highlighted ", sum(z$filtered) , " peptide(s) found in less than ", ncol(y) -2, " replicates")
+Highlighted ", sum(x_filter_highlight$filtered) , " peptide(s) found in less than ", ncol(x_clean_with_mean) -2, " replicates")
   
-  return(z)
+  return(x_filter_highlight)
 }
 ```
 
 The filter_pep function is run on every dataset. A “filter” dataset were
 peptides missing in more than 1 replicate are removed is also created.
 
-1 ng
+## 1 ng
 
 ``` r
 OTDIA_7k_1 <-  filter_pep(OTDIA_7k_1)
@@ -176,7 +169,7 @@ LITDIA_Normal_1 <- filter_pep(LITDIA_Normal_1)
 LITDIA_Normal_1_filter <- LITDIA_Normal_1[LITDIA_Normal_1$filtered == FALSE,]
 ```
 
-5 ng
+## 5 ng
 
 ``` r
 OTDIA_7k_5 <-  filter_pep(OTDIA_7k_5)
@@ -234,7 +227,7 @@ LITDIA_Normal_5 <- filter_pep(LITDIA_Normal_5)
 LITDIA_Normal_5_filter <- LITDIA_Normal_5[LITDIA_Normal_5$filtered == FALSE,]
 ```
 
-10 ng
+## 10 ng
 
 ``` r
 OTDIA_7k_10 <-  filter_pep(OTDIA_7k_10)
@@ -292,7 +285,7 @@ LITDIA_Normal_10 <- filter_pep(LITDIA_Normal_10)
 LITDIA_Normal_10_filter <- LITDIA_Normal_10[LITDIA_Normal_10$filtered == FALSE,]
 ```
 
-100 ng
+## 100 ng
 
 ``` r
 OTDIA_7k_100 <-  filter_pep(OTDIA_7k_100)
@@ -383,9 +376,8 @@ values for each column corresponding to a replicate.
 
 ### 1 ng
 
-OT
-
 ``` r
+#OT
 for(i in 2:5){
   id_OTDIA_7k_1[i-1] <- sum(!is.na(OTDIA_7k_1[, i]))}
 
@@ -394,11 +386,8 @@ for(i in 2:5){
 
 for(i in 2:5){
   id_OTDIA_30k_1[i-1] <- sum(!is.na(OTDIA_30k_1[, i]))}
-```
 
-LIT
-
-``` r
+#LIT
 for(i in 2:5){
 id_LITDIA_Turbo_1[i-1] <- sum(!is.na(LITDIA_Turbo_1[, i]))}
 
@@ -411,9 +400,8 @@ id_LITDIA_Normal_1[i-1] <- sum(!is.na(LITDIA_Normal_1[, i]))}
 
 ### 5 ng
 
-OT
-
 ``` r
+#OT
 for(i in 2:5){
   id_OTDIA_7k_5[i-1] <- sum(!is.na(OTDIA_7k_5[, i]))}
 
@@ -422,11 +410,8 @@ for(i in 2:5){
 
 for(i in 2:5){
   id_OTDIA_30k_5[i-1] <- sum(!is.na(OTDIA_30k_5[, i]))}
-```
 
-LIT
-
-``` r
+#LIT
 for(i in 2:5){
 id_LITDIA_Turbo_5[i-1] <- sum(!is.na(LITDIA_Turbo_5[, i]))}
 
@@ -439,9 +424,8 @@ id_LITDIA_Normal_5[i-1] <- sum(!is.na(LITDIA_Normal_5[, i]))}
 
 ### 10 ng
 
-OT
-
 ``` r
+#OT
 for(i in 2:5){
   id_OTDIA_7k_10[i-1] <- sum(!is.na(OTDIA_7k_10[, i]))}
 
@@ -450,11 +434,8 @@ for(i in 2:5){
 
 for(i in 2:5){
   id_OTDIA_30k_10[i-1] <- sum(!is.na(OTDIA_30k_10[, i]))}
-```
 
-LIT Turbo DIA auto
-
-``` r
+#LIT
 for(i in 2:5){
 id_LITDIA_Turbo_10[i-1] <- sum(!is.na(LITDIA_Turbo_10[, i]))}
 
@@ -467,9 +448,8 @@ id_LITDIA_Normal_10[i-1] <- sum(!is.na(LITDIA_Normal_10[, i]))}
 
 ### 100 ng
 
-OT
-
 ``` r
+#OT
 for(i in 2:5){
   id_OTDIA_7k_100[i-1] <- sum(!is.na(OTDIA_7k_100[, i]))}
 
@@ -478,11 +458,8 @@ for(i in 2:5){
 
 for(i in 2:5){
   id_OTDIA_30k_100[i-1] <- sum(!is.na(OTDIA_30k_100[, i]))}
-```
 
-LIT
-
-``` r
+#LIT
 for(i in 2:5){
 id_LITDIA_Turbo_100[i-1] <- sum(!is.na(LITDIA_Turbo_100[, i]))}
 
@@ -500,18 +477,30 @@ frame containing information about the method (OT resolution and LIT
 scanning mode), the replicate and the input.
 
 ``` r
-id_pep <- data.frame(method = rep(c(rep("OT 7.5k", 4), rep("OT 15k", 4), rep("OT 30k", 4),
-                                    rep("LIT Turbo", 4), rep("LIT Rapid", 4), rep("LIT Normal", 4)), 4),
-           replicate = rep(1:4, 24),
-           id = c(id_OTDIA_7k_1, id_OTDIA_15k_1, id_OTDIA_30k_1, 
-                  id_LITDIA_Turbo_1, id_LITDIA_Rapid_1, id_LITDIA_Normal_1,
-                  id_OTDIA_7k_5, id_OTDIA_15k_5, id_OTDIA_30k_5, 
-                  id_LITDIA_Turbo_5, id_LITDIA_Rapid_5, id_LITDIA_Normal_5,
-                  id_OTDIA_7k_10, id_OTDIA_15k_10, id_OTDIA_30k_10, 
-                  id_LITDIA_Turbo_10, id_LITDIA_Rapid_10, id_LITDIA_Normal_10,
-                  id_OTDIA_7k_100, id_OTDIA_15k_100, id_OTDIA_30k_100, 
-                  id_LITDIA_Turbo_100, id_LITDIA_Rapid_100, id_LITDIA_Normal_100),
-           input = c(rep("1 ng", 24), rep("5 ng", 24), rep("10 ng", 24), rep("100 ng", 24)))
+id_pep <- 
+  data.frame(method = rep(c(rep("OT 7.5k", 4), 
+                            rep("OT 15k", 4), 
+                            rep("OT 30k", 4),
+                            rep("LIT Turbo", 4),
+                            rep("LIT Rapid", 4),
+                            rep("LIT Normal", 4)), 4),
+             replicate = rep(1:4, 24),
+             id = c(id_OTDIA_7k_1, id_OTDIA_15k_1, 
+                    id_OTDIA_30k_1, id_LITDIA_Turbo_1,
+                    id_LITDIA_Rapid_1, id_LITDIA_Normal_1,
+                    id_OTDIA_7k_5, id_OTDIA_15k_5,
+                    id_OTDIA_30k_5, id_LITDIA_Turbo_5,
+                    id_LITDIA_Rapid_5, id_LITDIA_Normal_5,
+                    id_OTDIA_7k_10, id_OTDIA_15k_10,
+                    id_OTDIA_30k_10, id_LITDIA_Turbo_10,
+                    id_LITDIA_Rapid_10, id_LITDIA_Normal_10,
+                    id_OTDIA_7k_100, id_OTDIA_15k_100,
+                    id_OTDIA_30k_100, id_LITDIA_Turbo_100,
+                    id_LITDIA_Rapid_100, id_LITDIA_Normal_100),
+           input = c(rep("1 ng", 24),
+                     rep("5 ng", 24),
+                     rep("10 ng", 24),
+                     rep("100 ng", 24)))
 
 # Factorise to set order
 id_pep$method <- factor(id_pep$method, levels = unique(id_pep$method))
@@ -532,7 +521,8 @@ figure1a <- id_pep %>%
   theme_bw()+
   geom_line(size = 2.5)+
   geom_point(size = 4)+
-  scale_color_manual(values = c("#ADC2E8", "#7F9FDB", "#527DCE", "#EEB9CF", "#DF7FA7", "#D35087"))+
+  scale_color_manual(values = c("#ADC2E8", "#7F9FDB", "#527DCE", 
+                                "#EEB9CF", "#DF7FA7", "#D35087"))+
   geom_errorbar(aes(ymin = mean_id - sd_id, 
                          ymax = mean_id + sd_id),
                     width = 0.1,
@@ -550,7 +540,9 @@ figure1a <- id_pep %>%
         legend.key.size = unit(0.9, "cm"),
         plot.title = element_text(size = 32, face = "bold",
                                   hjust = -0.2),
-        axis.text.x = element_text(angle = 90, vjust = 0.3, hjust = 1))
+        axis.text.x = element_text(angle = 90, 
+                                   vjust = 0.3,
+                                   hjust = 1))
 ```
 
     ## `summarise()` has grouped output by 'method'. You can override using the
@@ -560,7 +552,7 @@ figure1a <- id_pep %>%
 figure1a
 ```
 
-![](Figure1_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
+![](Figure1_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 # Figure B
 
@@ -595,9 +587,8 @@ information about the method and the input are added afterward.
 
 ### 1 ng
 
-LIT
-
 ``` r
+#LIT
 LITDIA_Turbo_1_CV <- compute_CV(LITDIA_Turbo_1)
 LITDIA_Turbo_1_CV$method <- "LIT Turbo"
 LITDIA_Turbo_1_CV$input<- 1
@@ -609,11 +600,8 @@ LITDIA_Rapid_1_CV$input<- 1
 LITDIA_Normal_1_CV <- compute_CV(LITDIA_Normal_1)
 LITDIA_Normal_1_CV$method <- "LIT Normal"
 LITDIA_Normal_1_CV$input<- 1
-```
 
-OT
-
-``` r
+#OT
 OTDIA_7k_1_CV <- compute_CV(OTDIA_7k_1)
 OTDIA_7k_1_CV$method <- "OT 7k"
 OTDIA_7k_1_CV$input<- 1
@@ -629,9 +617,8 @@ OTDIA_30k_1_CV$input<- 1
 
 ### 5 ng
 
-LIT
-
 ``` r
+#LIT
 LITDIA_Turbo_5_CV <- compute_CV(LITDIA_Turbo_5)
 LITDIA_Turbo_5_CV$method <- "LIT Turbo"
 LITDIA_Turbo_5_CV$input<- 5
@@ -643,11 +630,8 @@ LITDIA_Rapid_5_CV$input<- 5
 LITDIA_Normal_5_CV <- compute_CV(LITDIA_Normal_5)
 LITDIA_Normal_5_CV$method <- "LIT Normal"
 LITDIA_Normal_5_CV$input<- 5
-```
 
-OT
-
-``` r
+#OT
 OTDIA_7k_5_CV <- compute_CV(OTDIA_7k_5)
 OTDIA_7k_5_CV$method <- "OT 7k"
 OTDIA_7k_5_CV$input<- 5
@@ -663,9 +647,8 @@ OTDIA_30k_5_CV$input<- 5
 
 ### 10 ng
 
-LIT
-
 ``` r
+#LIT
 LITDIA_Turbo_10_CV <- compute_CV(LITDIA_Turbo_10)
 LITDIA_Turbo_10_CV$method <- "LIT Turbo"
 LITDIA_Turbo_10_CV$input<- 10
@@ -677,11 +660,8 @@ LITDIA_Rapid_10_CV$input<- 10
 LITDIA_Normal_10_CV <- compute_CV(LITDIA_Normal_10)
 LITDIA_Normal_10_CV$method <- "LIT Normal"
 LITDIA_Normal_10_CV$input<- 10
-```
 
-OT
-
-``` r
+#OT
 OTDIA_7k_10_CV <- compute_CV(OTDIA_7k_10)
 OTDIA_7k_10_CV$method <- "OT 7k"
 OTDIA_7k_10_CV$input<- 10
@@ -697,9 +677,8 @@ OTDIA_30k_10_CV$input<- 10
 
 ### 100 ng
 
-LIT
-
 ``` r
+#LIT
 LITDIA_Turbo_100_CV <- compute_CV(LITDIA_Turbo_100)
 LITDIA_Turbo_100_CV$method <- "LIT Turbo"
 LITDIA_Turbo_100_CV$input<- 100
@@ -711,11 +690,8 @@ LITDIA_Rapid_100_CV$input<- 100
 LITDIA_Normal_100_CV <- compute_CV(LITDIA_Normal_100)
 LITDIA_Normal_100_CV$method <- "LIT Normal"
 LITDIA_Normal_100_CV$input<- 100
-```
 
-OT
-
-``` r
+#OT
 OTDIA_7k_100_CV <- compute_CV(OTDIA_7k_100)
 OTDIA_7k_100_CV$method <- "OT 7k"
 OTDIA_7k_100_CV$input<- 100
@@ -842,7 +818,7 @@ figure1b <- CV_joined %>%
 figure1b
 ```
 
-![](Figure1_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
+![](Figure1_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
 
 # Figure C
 
@@ -1020,25 +996,43 @@ figure1c <- figure1c_join %>%
   scale_y_log10(breaks = c(1000, 100000)) +
   scale_x_log10() +
   facet_grid(input~method)
-labels <- paste0(c(sum(figure1c_join$method == "LIT Turbo vs OT 7.5k" & figure1c_join$input == "1 ng"),
-                   sum(figure1c_join$method == "LIT Rapid vs OT 15k" & figure1c_join$input == "1 ng"),
-                   sum(figure1c_join$method == "LIT Normal vs OT 30k" & figure1c_join$input == "1 ng"),
-                   sum(figure1c_join$method == "LIT Turbo vs OT 7.5k" & figure1c_join$input == "5 ng"),
-                   sum(figure1c_join$method == "LIT Rapid vs OT 15k" & figure1c_join$input == "5 ng"),
-                   sum(figure1c_join$method == "LIT Normal vs OT 30k" & figure1c_join$input == "5 ng"),
-                   sum(figure1c_join$method == "LIT Turbo vs OT 7.5k" & figure1c_join$input == "10 ng"),
-                   sum(figure1c_join$method == "LIT Rapid vs OT 15k" & figure1c_join$input == "10 ng"),
-                   sum(figure1c_join$method == "LIT Normal vs OT 30k" & figure1c_join$input == "10 ng"),
-                   sum(figure1c_join$method == "LIT Turbo vs OT 7.5k" & figure1c_join$input == "100 ng"),
-                   sum(figure1c_join$method == "LIT Rapid vs OT 15k" & figure1c_join$input == "100 ng"),
-                   sum(figure1c_join$method == "LIT Normal vs OT 30k" & figure1c_join$input == "100 ng")),
-                 " pep.")
+labels <- 
+  paste0(c(sum(figure1c_join$method == "LIT Turbo vs OT 7.5k" &
+                 figure1c_join$input == "1 ng"),
+           sum(figure1c_join$method == "LIT Rapid vs OT 15k" & 
+                 figure1c_join$input == "1 ng"),
+           sum(figure1c_join$method == "LIT Normal vs OT 30k" & 
+                 figure1c_join$input == "1 ng"),
+           sum(figure1c_join$method == "LIT Turbo vs OT 7.5k" &
+                 figure1c_join$input == "5 ng"),
+           sum(figure1c_join$method == "LIT Rapid vs OT 15k" &
+                 figure1c_join$input == "5 ng"),
+           sum(figure1c_join$method == "LIT Normal vs OT 30k" &
+                 figure1c_join$input == "5 ng"),
+           sum(figure1c_join$method == "LIT Turbo vs OT 7.5k" &
+                 figure1c_join$input == "10 ng"),
+           sum(figure1c_join$method == "LIT Rapid vs OT 15k" &
+                 figure1c_join$input == "10 ng"),
+           sum(figure1c_join$method == "LIT Normal vs OT 30k" &
+                 figure1c_join$input == "10 ng"),
+           sum(figure1c_join$method == "LIT Turbo vs OT 7.5k" &
+                 figure1c_join$input == "100 ng"),
+           sum(figure1c_join$method == "LIT Rapid vs OT 15k" &
+                 figure1c_join$input == "100 ng"),
+           sum(figure1c_join$method == "LIT Normal vs OT 30k" &
+                 figure1c_join$input == "100 ng")),
+         " pep.")
+
 data_labels <- 
   data.frame(method = as.factor(rep(c("LIT Turbo vs OT 7.5k",
                                       "LIT Rapid vs OT 15k",
                                       "LIT Normal vs OT 30k"),4)),
-             input = as.factor(c(rep("1 ng",3), rep("5 ng",3),rep("10 ng",3), rep("100 ng",3))),
+             input = as.factor(c(rep("1 ng",3),
+                                 rep("5 ng",3),
+                                 rep("10 ng",3),
+                                 rep("100 ng",3))),
              label = labels)
+
 figure1c <- figure1c +
   geom_text(x = -Inf, y = Inf,
             hjust = -0.15, vjust = 3.2,
@@ -1053,7 +1047,7 @@ figure1c <- figure1c +
 figure1c
 ```
 
-![](Figure1_files/figure-gfm/unnamed-chunk-44-1.png)<!-- -->
+![](Figure1_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
 
 # Figure D
 
@@ -1180,12 +1174,18 @@ Data frames for are combined. Only relevant columns are kept.
 
 ``` r
 figure1d_join <- 
-  rbind(LITDIA_Turbo_1_filter[,c(1,6:10)], LITDIA_Turbo_5_filter[,c(1,6:10)],
-        LITDIA_Turbo_10_filter[,c(1,6:10)], LITDIA_Turbo_100_filter[,c(1,6:10)],
-        LITDIA_Rapid_1_filter[,c(1,6:10)], LITDIA_Rapid_5_filter[,c(1,6:10)],
-        LITDIA_Rapid_10_filter[,c(1,6:10)], LITDIA_Rapid_100_filter[,c(1,6:10)],
-        LITDIA_Normal_1_filter[,c(1,6:10)], LITDIA_Normal_5_filter[,c(1,6:10)],
-        LITDIA_Normal_10_filter[,c(1,6:10)], LITDIA_Normal_100_filter[,c(1,6:10)]) 
+  rbind(LITDIA_Turbo_1_filter[,c(1,6:10)], 
+        LITDIA_Turbo_5_filter[,c(1,6:10)],
+        LITDIA_Turbo_10_filter[,c(1,6:10)], 
+        LITDIA_Turbo_100_filter[,c(1,6:10)],
+        LITDIA_Rapid_1_filter[,c(1,6:10)], 
+        LITDIA_Rapid_5_filter[,c(1,6:10)],
+        LITDIA_Rapid_10_filter[,c(1,6:10)], 
+        LITDIA_Rapid_100_filter[,c(1,6:10)],
+        LITDIA_Normal_1_filter[,c(1,6:10)], 
+        LITDIA_Normal_5_filter[,c(1,6:10)],
+        LITDIA_Normal_10_filter[,c(1,6:10)], 
+        LITDIA_Normal_100_filter[,c(1,6:10)]) 
 
 # Factorise to set order
 figure1d_join$method <- factor(figure1d_join$method,
@@ -1225,45 +1225,100 @@ figure1d <- figure1d_join %>%
                                   hjust = -0.12)) +
   facet_grid(input ~ method)
 labels1 <- 
-  paste0(c(sum(figure1d_join$method == "Turbo" & figure1d_join$input == "1 ng" & figure1d_join$in_OT == FALSE),
-           sum(figure1d_join$method == "Rapid" & figure1d_join$input == "1 ng" & figure1d_join$in_OT == FALSE),
-           sum(figure1d_join$method == "Normal" & figure1d_join$input == "1 ng" & figure1d_join$in_OT == FALSE),
-           sum(figure1d_join$method == "Turbo" & figure1d_join$input == "5 ng" & figure1d_join$in_OT == FALSE),
-           sum(figure1d_join$method == "Rapid" & figure1d_join$input == "5 ng" & figure1d_join$in_OT == FALSE),
-           sum(figure1d_join$method == "Normal" & figure1d_join$input == "5 ng" & figure1d_join$in_OT == FALSE),
-           sum(figure1d_join$method == "Turbo" & figure1d_join$input == "10 ng" & figure1d_join$in_OT == FALSE),
-           sum(figure1d_join$method == "Rapid" & figure1d_join$input == "10 ng" & figure1d_join$in_OT == FALSE),
-           sum(figure1d_join$method == "Normal" & figure1d_join$input == "10 ng" & figure1d_join$in_OT == FALSE),
-           sum(figure1d_join$method == "Turbo" & figure1d_join$input == "100 ng" & figure1d_join$in_OT == FALSE),
-           sum(figure1d_join$method == "Rapid" &  figure1d_join$input == "100 ng" & figure1d_join$in_OT == FALSE),
-           sum(figure1d_join$method == "Normal" & figure1d_join$input == "100 ng" & figure1d_join$in_OT == FALSE)),
+  paste0(c(sum(figure1d_join$method == "Turbo" & 
+                 figure1d_join$input == "1 ng" & 
+                 figure1d_join$in_OT == FALSE),
+           sum(figure1d_join$method == "Rapid" &
+                 figure1d_join$input == "1 ng" &
+                 figure1d_join$in_OT == FALSE),
+           sum(figure1d_join$method == "Normal" &
+                 figure1d_join$input == "1 ng" &
+                 figure1d_join$in_OT == FALSE),
+           sum(figure1d_join$method == "Turbo" &
+                 figure1d_join$input == "5 ng" &
+                 figure1d_join$in_OT == FALSE),
+           sum(figure1d_join$method == "Rapid" &
+                 figure1d_join$input == "5 ng" &
+                 figure1d_join$in_OT == FALSE),
+           sum(figure1d_join$method == "Normal" &
+                 figure1d_join$input == "5 ng" &
+                 figure1d_join$in_OT == FALSE),
+           sum(figure1d_join$method == "Turbo" &
+                 figure1d_join$input == "10 ng" &
+                 figure1d_join$in_OT == FALSE),
+           sum(figure1d_join$method == "Rapid" &
+                 figure1d_join$input == "10 ng" &
+                 figure1d_join$in_OT == FALSE),
+           sum(figure1d_join$method == "Normal" &
+                 figure1d_join$input == "10 ng" &
+                 figure1d_join$in_OT == FALSE),
+           sum(figure1d_join$method == "Turbo" &
+                 figure1d_join$input == "100 ng" & figure1d_join$in_OT == FALSE),
+           sum(figure1d_join$method == "Rapid" &
+                 figure1d_join$input == "100 ng" &
+                 figure1d_join$in_OT == FALSE),
+           sum(figure1d_join$method == "Normal" &
+                 figure1d_join$input == "100 ng" &
+                 figure1d_join$in_OT == FALSE)),
          " pep.")
                        
 data_labels1 <- 
-  data.frame(method = as.factor(rep(c("Turbo", "Rapid", "Normal"),4)),
-             input = as.factor(c(rep("1 ng",3), rep("5 ng",3), rep("10 ng",3), rep("100 ng",3))),
+  data.frame(method = 
+               as.factor(rep(c("Turbo", "Rapid", "Normal"),4)),
+             input = 
+               as.factor(c(rep("1 ng",3), rep("5 ng",3),
+                           rep("10 ng",3), rep("100 ng",3))),
              label = labels1,
              in_OT = rep(FALSE, 12))
-labels2<- 
-  paste0(c(sum(figure1d_join$method == "Turbo" & figure1d_join$input == "1 ng" & figure1d_join$in_OT == TRUE),
-           sum(figure1d_join$method == "Rapid" & figure1d_join$input == "1 ng" & figure1d_join$in_OT == TRUE),
-           sum(figure1d_join$method == "Normal" & figure1d_join$input == "1 ng" & figure1d_join$in_OT == TRUE),
-           sum(figure1d_join$method == "Turbo" & figure1d_join$input == "5 ng" & figure1d_join$in_OT == TRUE),
-           sum(figure1d_join$method == "Rapid" & figure1d_join$input == "5 ng" & figure1d_join$in_OT == TRUE),
-           sum(figure1d_join$method == "Normal" & figure1d_join$input == "5 ng" & figure1d_join$in_OT == TRUE),
-           sum(figure1d_join$method == "Turbo" & figure1d_join$input == "10 ng" & figure1d_join$in_OT == TRUE),
-           sum(figure1d_join$method == "Rapid" & figure1d_join$input == "10 ng" & figure1d_join$in_OT == TRUE),
-           sum(figure1d_join$method == "Normal" & figure1d_join$input == "10 ng" & figure1d_join$in_OT == TRUE),
-           sum(figure1d_join$method == "Turbo" & figure1d_join$input == "100 ng" & figure1d_join$in_OT == TRUE),
-           sum(figure1d_join$method == "Rapid" &  figure1d_join$input == "100 ng" & figure1d_join$in_OT == TRUE),
-           sum(figure1d_join$method == "Normal" & figure1d_join$input == "100 ng" & figure1d_join$in_OT == TRUE)),
+
+labels2 <- 
+  paste0(c(sum(figure1d_join$method == "Turbo" &
+                 figure1d_join$input == "1 ng" &
+                 figure1d_join$in_OT == TRUE),
+           sum(figure1d_join$method == "Rapid" &
+                 figure1d_join$input == "1 ng" &
+                 figure1d_join$in_OT == TRUE),
+           sum(figure1d_join$method == "Normal" &
+                 figure1d_join$input == "1 ng" &
+                 figure1d_join$in_OT == TRUE),
+           sum(figure1d_join$method == "Turbo" &
+                 figure1d_join$input == "5 ng" &
+                 figure1d_join$in_OT == TRUE),
+           sum(figure1d_join$method == "Rapid" &
+                 figure1d_join$input == "5 ng" &
+                 figure1d_join$in_OT == TRUE),
+           sum(figure1d_join$method == "Normal" &
+                 figure1d_join$input == "5 ng" &
+                 figure1d_join$in_OT == TRUE),
+           sum(figure1d_join$method == "Turbo" &
+                 figure1d_join$input == "10 ng" &
+                 figure1d_join$in_OT == TRUE),
+           sum(figure1d_join$method == "Rapid" &
+                 figure1d_join$input == "10 ng" &
+                 figure1d_join$in_OT == TRUE),
+           sum(figure1d_join$method == "Normal" &
+                 figure1d_join$input == "10 ng" &
+                 figure1d_join$in_OT == TRUE),
+           sum(figure1d_join$method == "Turbo" &
+                 figure1d_join$input == "100 ng" &
+                 figure1d_join$in_OT == TRUE),
+           sum(figure1d_join$method == "Rapid" &
+                 figure1d_join$input == "100 ng" &
+                 figure1d_join$in_OT == TRUE),
+           sum(figure1d_join$method == "Normal" &
+                 figure1d_join$input == "100 ng" &
+                 figure1d_join$in_OT == TRUE)),
          " pep.")
                        
 data_labels2 <- 
-  data.frame(method = as.factor(rep(c("Turbo", "Rapid", "Normal"),4)),
-             input = as.factor(c(rep("1 ng",3), rep("5 ng",3), rep("10 ng",3), rep("100 ng",3))),
+  data.frame(method = 
+               as.factor(rep(c("Turbo", "Rapid", "Normal"),4)),
+             input = 
+               as.factor(c(rep("1 ng",3), rep("5 ng",3),
+                           rep("10 ng",3), rep("100 ng",3))),
              label = labels2,
              in_OT = rep(TRUE, 12))
+
 figure1d <- figure1d +
   geom_text(x = -Inf, y = Inf,
             hjust = -0.1, vjust = 1.82,
@@ -1286,7 +1341,7 @@ figure1d <- figure1d +
 figure1d
 ```
 
-![](Figure1_files/figure-gfm/unnamed-chunk-50-1.png)<!-- -->
+![](Figure1_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
 
 # Join A,B,C and D
 
@@ -1303,7 +1358,7 @@ figure1 <- temp/temp2/temp3 + plot_layout(heights = c(0.8, 1, 1))
 figure1
 ```
 
-![](Figure1_files/figure-gfm/unnamed-chunk-51-1.png)<!-- -->
+![](Figure1_files/figure-gfm/unnamed-chunk-39-1.png)<!-- -->
 
 ``` r
 #Save as pdf
@@ -1311,3 +1366,42 @@ figure1
 #figure1
 #dev.off()
 ```
+
+# Session information
+
+    ## R version 4.2.1 (2022-06-23 ucrt)
+    ## Platform: x86_64-w64-mingw32/x64 (64-bit)
+    ## Running under: Windows 10 x64 (build 19044)
+    ## 
+    ## Matrix products: default
+    ## 
+    ## locale:
+    ## [1] LC_COLLATE=French_Belgium.utf8  LC_CTYPE=French_Belgium.utf8   
+    ## [3] LC_MONETARY=French_Belgium.utf8 LC_NUMERIC=C                   
+    ## [5] LC_TIME=French_Belgium.utf8    
+    ## 
+    ## attached base packages:
+    ## [1] stats     graphics  grDevices utils     datasets  methods   base     
+    ## 
+    ## other attached packages:
+    ##  [1] ggpointdensity_0.1.0 patchwork_1.1.1      ggpubr_0.4.0        
+    ##  [4] forcats_0.5.1        stringr_1.4.0        dplyr_1.0.9         
+    ##  [7] purrr_0.3.4          readr_2.1.2          tidyr_1.2.0         
+    ## [10] tibble_3.1.7         ggplot2_3.3.6        tidyverse_1.3.1     
+    ## 
+    ## loaded via a namespace (and not attached):
+    ##  [1] lubridate_1.8.0   assertthat_0.2.1  digest_0.6.29     utf8_1.2.2       
+    ##  [5] R6_2.5.1          cellranger_1.1.0  backports_1.4.1   reprex_2.0.1     
+    ##  [9] evaluate_0.15     highr_0.9         httr_1.4.3        pillar_1.7.0     
+    ## [13] rlang_1.0.2       readxl_1.4.0      rstudioapi_0.13   car_3.0-13       
+    ## [17] rmarkdown_2.14    labeling_0.4.2    munsell_0.5.0     broom_0.8.0      
+    ## [21] compiler_4.2.1    modelr_0.1.8      xfun_0.31         pkgconfig_2.0.3  
+    ## [25] htmltools_0.5.2   tidyselect_1.1.2  viridisLite_0.4.0 fansi_1.0.3      
+    ## [29] crayon_1.5.1      tzdb_0.3.0        dbplyr_2.1.1      withr_2.5.0      
+    ## [33] grid_4.2.1        jsonlite_1.8.0    gtable_0.3.0      lifecycle_1.0.1  
+    ## [37] DBI_1.1.2         magrittr_2.0.3    scales_1.2.0      cli_3.3.0        
+    ## [41] stringi_1.7.6     carData_3.0-5     farver_2.1.0      ggsignif_0.6.3   
+    ## [45] fs_1.5.2          xml2_1.3.3        ellipsis_0.3.2    generics_0.1.2   
+    ## [49] vctrs_0.4.1       tools_4.2.1       glue_1.6.2        hms_1.1.1        
+    ## [53] abind_1.4-5       fastmap_1.1.0     yaml_2.3.5        colorspace_2.0-3 
+    ## [57] rstatix_0.7.0     rvest_1.0.2       knitr_1.39        haven_2.5.0
