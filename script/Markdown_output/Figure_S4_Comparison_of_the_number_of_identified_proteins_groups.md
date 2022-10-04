@@ -1,0 +1,454 @@
+Supporting figure S4 Comparison of the number of identified proteins
+groups
+================
+Samuel Grégoire
+
+Supporting figure S4 Comparison of the number of identified proteins
+groups in serial dilution (1, 5, 10, and 100 ng) of HeLa tryptic
+digested between DIA-OT-based methods with different resolution scans
+(7.5k, 15k, and 30k) and DIA-LIT-based methods with different scanning
+modes (Turbo, Rapid, Normal on 40 SPD) by Spectronaut version 15.
+
+# Load packages
+
+``` r
+library("tidyverse")
+```
+
+# Load data
+
+The path to every folder used is stored to keep everything compact. LIT
+data is stored in the folder located in lit_path. To reproduce analysis
+the path must be changed to corresponding path on the local computer.
+
+``` r
+#lit_path <- "C:/Data/LIT/"
+#ot_path <- "C:/Data/OT/"
+```
+
+Data tables were exported from Spectronaut (version 15.5.211111.50606)
+in csv files and need to be loaded in RStudio with the function
+`read.csv2()`.
+
+## LIT
+
+### Turbo
+
+``` r
+LITDIA_Turbo_1 <- read.csv2(paste0(lit_path, "20220502_LIT_Turbo_DIA_1ng_40SPD_whisper100_1CV_auto.csv"))
+LITDIA_Turbo_5 <- read.csv2(paste0(lit_path, "20220502_LIT_Turbo_DIA_5ng_40SPD_whisper100_1CV_auto.csv"))
+LITDIA_Turbo_10 <- read.csv2(paste0(lit_path, "20220502_LIT_Turbo_DIA_10ng_40SPD_whisper100_1CV_auto.csv"))
+LITDIA_Turbo_100 <- read.csv2(paste0(lit_path, "20220502_LIT_Turbo_DIA_100ng_40SPD_whisper100_1CV_auto.csv"))
+```
+
+### Rapid
+
+``` r
+LITDIA_Rapid_1 <- read.csv2(paste0(lit_path, "20220421_LIT_Rapid_DIA_1ng_40SPD_whisper100_1CV_auto.csv"))
+LITDIA_Rapid_5 <- read.csv2(paste0(lit_path, "20220502_LIT_Rapid_DIA_5ng_40SPD_whisper100_1CV_auto.csv"))
+LITDIA_Rapid_10 <- read.csv2(paste0(lit_path, "20220502_LIT_Rapid_DIA_10ng_40SPD_whisper100_1CV_auto.csv"))
+LITDIA_Rapid_100 <- read.csv2(paste0(lit_path, "20220421_LIT_Rapid_DIA_100ng_40SPD_whisper100_1CV_auto.csv"))
+```
+
+### Normal
+
+``` r
+LITDIA_Normal_1 <- read.csv2(paste0(lit_path, "20220421_LIT_Normal_DIA_1ng_40SPD_whisper100_1CV_auto.csv"))
+LITDIA_Normal_5 <- read.csv2(paste0(lit_path, "20220502_LIT_Normal_DIA_5ng_40SPD_whisper100_1CV_auto.csv"))
+LITDIA_Normal_10 <- read.csv2(paste0(lit_path, "20220502_LIT_Normal_DIA_10ng_40SPD_whisper100_1CV_auto.csv"))
+LITDIA_Normal_100 <- read.csv2(paste0(lit_path, "20220421_LIT_Normal_DIA_100ng_40SPD_whisper100_1CV_auto.csv"))
+```
+
+## OT
+
+### 7.5k
+
+``` r
+OTDIA_7k_1 <- read.csv2(paste0(ot_path, "20220421_OT_7k_DIA_1ng_40SPD_whisper100_1CV.csv"))
+OTDIA_7k_5 <- read.csv2(paste0(ot_path, "20220502_OT_7k_DIA_5ng_40SPD_whisper100_1CV.csv"))
+OTDIA_7k_10 <- read.csv2(paste0(ot_path, "20220502_OT_7k_DIA_10ng_40SPD_whisper100_1CV.csv"))
+OTDIA_7k_100 <- read.csv2(paste0(ot_path, "20220421_OT_7k_DIA_100ng_40SPD_whisper100_1CV.csv"))
+```
+
+### 15k
+
+``` r
+OTDIA_15k_1 <- read.csv2(paste0(ot_path, "20220421_OT_15k_DIA_1ng_40SPD_whisper100_1CV.csv"))
+OTDIA_15k_5 <- read.csv2(paste0(ot_path, "20220509_OT_15k_DIA_5ng_40SPD_whisper100_1CV.csv"))
+OTDIA_15k_10 <- read.csv2(paste0(ot_path, "20220502_OT_15k_DIA_10ng_40SPD_whisper100_1CV.csv"))
+OTDIA_15k_100 <- read.csv2(paste0(ot_path, "20220425_OT_15k_DIA_100ng_40SPD_whisper100_1CV.csv"))
+```
+
+### 30k
+
+``` r
+OTDIA_30k_1 <- read.csv2(paste0(ot_path, "20220421_OT_30k_DIA_1ng_40SPD_whisper100_1CV.csv"))
+OTDIA_30k_5 <- read.csv2(paste0(ot_path, "20220509_OT_30k_DIA_5ng_40SPD_whisper100_1CV.csv"))
+OTDIA_30k_10 <- read.csv2(paste0(ot_path, "20220502_OT_30k_DIA_10ng_40SPD_whisper100_1CV.csv"))
+OTDIA_30k_100 <- read.csv2(paste0(ot_path, "20220425_OT_30k_DIA_100ng_40SPD_whisper100_1CV.csv"))
+```
+
+# Clean data tables
+
+Imported tables contain a lot of information which is not useful for our
+analysis. The function below only keep the file names (replicates),
+quantitatives values for each file name and the peptide sequence. It
+also calculates the mean between replicates. Spectronaut does some
+imputation by default but we want to keep missing values. Imputed values
+are replaced by NA. Peptides missing in more than 1 replicates are
+highlighted (TRUE) in the “filtered” column.
+
+``` r
+filter_pep <- function(w) {
+  x <- w %>% 
+    group_by(PEP.StrippedSequence) %>% 
+    mutate(consensus_PG = names(sort(table(PG.ProteinGroups),
+                                     decreasing = TRUE))[1])
+  x$FG.Quantity[as.logical(x$EG.IsImputed)] <- NA
+  y <- x %>% 
+  group_by(R.Replicate, PEP.StrippedSequence, consensus_PG) %>% 
+  summarise(mean_quantity = mean(FG.Quantity, na.rm = TRUE)) %>%  
+  pivot_wider(names_from = R.Replicate, 
+              values_from = mean_quantity) %>%
+    suppressMessages()
+  z <- y %>% 
+  as.data.frame() %>% 
+  mutate(na_nbr = rowSums(is.na(y[-c(1,2)]))) %>%
+  mutate(mean_quantity = rowMeans(y[3:ncol(y)], na.rm = TRUE)) %>%
+  mutate(filtered = !na_nbr <= 1) %>% 
+  select(-na_nbr)  %>% 
+  suppressMessages("`summarise()` has grouped output by 'R.FileName'. You can override using the `.groups` argument.")
+  message("Filtered ", sum(z$filtered), " peptide(s) found in less than ", ncol(y) -3, " replicates")
+  t <- z %>% 
+  filter(filtered == FALSE)
+ return(t) }
+```
+
+The filter_pep function is run on every dataset. Informations about
+inputs and methods are added.
+
+``` r
+#Turbo
+LITDIA_Turbo_1_filter <- 
+  filter_pep(LITDIA_Turbo_1)
+```
+
+    ## Filtered 14 peptide(s) found in less than 3 replicates
+
+``` r
+LITDIA_Turbo_1_filter$input <- 1
+LITDIA_Turbo_1_filter$method <- "Turbo"
+
+LITDIA_Turbo_5_filter <- 
+  filter_pep(LITDIA_Turbo_5)
+```
+
+    ## Filtered 27 peptide(s) found in less than 3 replicates
+
+``` r
+LITDIA_Turbo_5_filter$input <- 5
+LITDIA_Turbo_5_filter$method <- "Turbo"
+
+LITDIA_Turbo_10_filter <- 
+  filter_pep(LITDIA_Turbo_10)
+```
+
+    ## Filtered 14 peptide(s) found in less than 3 replicates
+
+``` r
+LITDIA_Turbo_10_filter$input <- 10
+LITDIA_Turbo_10_filter$method <- "Turbo"
+
+LITDIA_Turbo_100_filter <- 
+  filter_pep(LITDIA_Turbo_100)
+```
+
+    ## Filtered 324 peptide(s) found in less than 3 replicates
+
+``` r
+LITDIA_Turbo_100_filter$input <- 100
+LITDIA_Turbo_100_filter$method <- "Turbo"
+
+#Rapid
+LITDIA_Rapid_1_filter <- 
+  filter_pep(LITDIA_Rapid_1)
+```
+
+    ## Filtered 12 peptide(s) found in less than 3 replicates
+
+``` r
+LITDIA_Rapid_1_filter$input <- 1
+LITDIA_Rapid_1_filter$method <- "Rapid"
+
+LITDIA_Rapid_5_filter <- 
+  filter_pep(LITDIA_Rapid_5)
+```
+
+    ## Filtered 13 peptide(s) found in less than 3 replicates
+
+``` r
+LITDIA_Rapid_5_filter$input <- 5
+LITDIA_Rapid_5_filter$method <- "Rapid"
+
+LITDIA_Rapid_10_filter <- 
+  filter_pep(LITDIA_Rapid_10)
+```
+
+    ## Filtered 21 peptide(s) found in less than 3 replicates
+
+``` r
+LITDIA_Rapid_10_filter$input <- 10
+LITDIA_Rapid_10_filter$method <- "Rapid"
+
+LITDIA_Rapid_100_filter <- 
+  filter_pep(LITDIA_Rapid_100)
+```
+
+    ## Filtered 282 peptide(s) found in less than 3 replicates
+
+``` r
+LITDIA_Rapid_100_filter$input <- 100
+LITDIA_Rapid_100_filter$method <- "Rapid"
+
+#Normal
+LITDIA_Normal_1_filter <- 
+  filter_pep(LITDIA_Normal_1)
+```
+
+    ## Filtered 41 peptide(s) found in less than 3 replicates
+
+``` r
+LITDIA_Normal_1_filter$input <- 1
+LITDIA_Normal_1_filter$method <- "Normal"
+
+LITDIA_Normal_5_filter <- 
+  filter_pep(LITDIA_Normal_5)
+```
+
+    ## Filtered 30 peptide(s) found in less than 3 replicates
+
+``` r
+LITDIA_Normal_5_filter$input <- 5
+LITDIA_Normal_5_filter$method <- "Normal"
+
+LITDIA_Normal_10_filter <- 
+  filter_pep(LITDIA_Normal_10)
+```
+
+    ## Filtered 28 peptide(s) found in less than 3 replicates
+
+``` r
+LITDIA_Normal_10_filter$input <- 10
+LITDIA_Normal_10_filter$method <- "Normal"
+
+LITDIA_Normal_100_filter <- 
+  filter_pep(LITDIA_Normal_100)
+```
+
+    ## Filtered 316 peptide(s) found in less than 3 replicates
+
+``` r
+LITDIA_Normal_100_filter$input <- 100
+LITDIA_Normal_100_filter$method <- "Normal"
+
+#7.5k
+OTDIA_7k_1_filter <- 
+  filter_pep(OTDIA_7k_1)
+```
+
+    ## Filtered 5 peptide(s) found in less than 3 replicates
+
+``` r
+OTDIA_7k_1_filter$input <- 1
+OTDIA_7k_1_filter$method <- "7.5k"
+
+OTDIA_7k_5_filter <- 
+  filter_pep(OTDIA_7k_5)
+```
+
+    ## Filtered 22 peptide(s) found in less than 3 replicates
+
+``` r
+OTDIA_7k_5_filter$input <- 5
+OTDIA_7k_5_filter$method <- "7.5k"
+
+OTDIA_7k_10_filter <- 
+  filter_pep(OTDIA_7k_10)
+```
+
+    ## Filtered 50 peptide(s) found in less than 3 replicates
+
+``` r
+OTDIA_7k_10_filter$input <- 10
+OTDIA_7k_10_filter$method <- "7.5k"
+
+OTDIA_7k_100_filter <- 
+  filter_pep(OTDIA_7k_100)
+```
+
+    ## Filtered 182 peptide(s) found in less than 3 replicates
+
+``` r
+OTDIA_7k_100_filter$input <- 100
+OTDIA_7k_100_filter$method <- "7.5k"
+
+#15k
+OTDIA_15k_1_filter <- 
+  filter_pep(OTDIA_15k_1)
+```
+
+    ## Filtered 7 peptide(s) found in less than 3 replicates
+
+``` r
+OTDIA_15k_1_filter$input <- 1
+OTDIA_15k_1_filter$method <- "15k"
+
+OTDIA_15k_5_filter <- 
+  filter_pep(OTDIA_15k_5)
+```
+
+    ## Filtered 88 peptide(s) found in less than 3 replicates
+
+``` r
+OTDIA_15k_5_filter$input <- 5
+OTDIA_15k_5_filter$method <- "15k"
+
+OTDIA_15k_10_filter <- 
+  filter_pep(OTDIA_15k_10)
+```
+
+    ## Filtered 46 peptide(s) found in less than 3 replicates
+
+``` r
+OTDIA_15k_10_filter$input <- 10
+OTDIA_15k_10_filter$method <- "15k"
+
+OTDIA_15k_100_filter <- 
+  filter_pep(OTDIA_15k_100)
+```
+
+    ## Filtered 132 peptide(s) found in less than 3 replicates
+
+``` r
+OTDIA_15k_100_filter$input <- 100
+OTDIA_15k_100_filter$method <- "15k"
+
+#30k
+OTDIA_30k_1_filter <- 
+  filter_pep(OTDIA_30k_1)
+```
+
+    ## Filtered 38 peptide(s) found in less than 3 replicates
+
+``` r
+OTDIA_30k_1_filter$input <- 1
+OTDIA_30k_1_filter$method <- "30k"
+
+OTDIA_30k_5_filter <- 
+  filter_pep(OTDIA_30k_5)
+```
+
+    ## Filtered 591 peptide(s) found in less than 3 replicates
+
+``` r
+OTDIA_30k_5_filter$input <- 5
+OTDIA_30k_5_filter$method <- "30k"
+
+OTDIA_30k_10_filter <- 
+  filter_pep(OTDIA_30k_10)
+```
+
+    ## Filtered 194 peptide(s) found in less than 3 replicates
+
+``` r
+OTDIA_30k_10_filter$input <- 10
+OTDIA_30k_10_filter$method <- "30k"
+
+OTDIA_30k_100_filter <- 
+  filter_pep(OTDIA_30k_100)
+```
+
+    ## Filtered 271 peptide(s) found in less than 3 replicates
+
+``` r
+OTDIA_30k_100_filter$input <- 100
+OTDIA_30k_100_filter$method <- "30k"
+```
+
+LIT and OT data are joined.
+
+``` r
+LIT <- rbind(LITDIA_Turbo_1_filter,
+      LITDIA_Turbo_5_filter, 
+      LITDIA_Turbo_10_filter,
+      LITDIA_Turbo_100_filter,
+      LITDIA_Rapid_1_filter,
+      LITDIA_Rapid_5_filter,
+      LITDIA_Rapid_10_filter,
+      LITDIA_Rapid_100_filter,
+      LITDIA_Normal_1_filter,
+      LITDIA_Normal_5_filter,
+      LITDIA_Normal_10_filter,
+      LITDIA_Normal_100_filter)
+LIT$mass_analyzer <- "LIT"
+
+OT <- rbind(OTDIA_7k_1_filter,
+      OTDIA_7k_5_filter, 
+      OTDIA_7k_10_filter,
+      OTDIA_7k_100_filter,
+      OTDIA_15k_1_filter,
+      OTDIA_15k_5_filter,
+      OTDIA_15k_10_filter,
+      OTDIA_15k_100_filter,
+      OTDIA_30k_1_filter,
+      OTDIA_30k_5_filter,
+      OTDIA_30k_10_filter,
+      OTDIA_30k_100_filter)
+OT$mass_analyzer <- "OT"
+
+LITvsOT <- rbind(LIT, OT)
+
+colnames(LITvsOT)[3:6] <- paste("Replicate", colnames(LITvsOT)[3:6], sep = "_")
+```
+
+``` r
+LITvsOT_prot <- LITvsOT %>% 
+  group_by(input, method, mass_analyzer) %>% 
+  summarise(prot_nbr = n_distinct(consensus_PG)) %>% 
+  as.data.frame()
+```
+
+    ## `summarise()` has grouped output by 'input', 'method'. You can override using
+    ## the `.groups` argument.
+
+``` r
+LITvsOT_prot$method <- factor(LITvsOT_prot$method, levels = c("7.5k", "15k", "30k", "Turbo", "Rapid", "Normal"))
+
+fig_sup4 <- LITvsOT_prot %>% 
+  ggplot(aes(x = input, y = prot_nbr, color = method, group = method)) +
+  geom_line(size = 2.5)+
+  geom_point(size = 4)+
+  scale_color_manual(values = c("#ADC2E8", "#7F9FDB", "#527DCE", "#EEB9CF", "#DF7FA7", "#D35087"))+
+  scale_x_log10(breaks = c(1, 5, 10, 100))+
+  theme_bw()+
+  theme(legend.position = c(0.17, 0.825),
+        legend.background = element_blank(),
+        legend.title = element_text(size = 27),
+        legend.text = element_text(size = 22),
+        axis.text = element_text(size = 24),
+        axis.title = element_text(size = 27),
+        legend.key.size = unit(0.9, "cm"),
+        axis.title.y = element_text(vjust = 2),
+        plot.margin = margin(t = 30,
+                             r = 5.5,
+                             b = 5.5,
+                             l = 5.5))+
+  labs(x = "Input (ng)",
+       y = "Identified proteins groups",
+       color = "Methods")
+
+#save as pdf
+#cairo_pdf(filename = "fig_sup4.pdf", width = 7.81, height = 6.46)
+#fig_sup4
+#dev.off()
+```

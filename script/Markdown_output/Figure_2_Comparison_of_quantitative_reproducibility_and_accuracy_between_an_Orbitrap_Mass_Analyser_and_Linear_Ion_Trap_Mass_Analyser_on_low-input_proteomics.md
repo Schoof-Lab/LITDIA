@@ -1,0 +1,985 @@
+Figure 2. Comparison of quantitative reproducibility and accuracy
+between an Orbitrap Mass Analyser and Linear Ion Trap Mass Analyser on
+low-input proteomics.
+================
+Samuel Grégoire
+
+Figure 2. Comparison of quantitative reproducibility and accuracy
+between an Orbitrap Mass Analyser and Linear Ion Trap Mass Analyser on
+low-input proteomics.
+
+# Load packages
+
+``` r
+library("tidyverse")
+library("patchwork")
+library("ggpointdensity")
+library("ggpubr")
+
+#set bw theme as default theme
+theme_set(theme_bw())
+```
+
+# Load data
+
+The path to data folders is stored to keep everything compact. LIT data
+is stored in the folder located in lit_path and OT data in ot_path.
+
+``` r
+#lit_path <-"C:/Data/LIT/"
+#ot_path <-"C:/Data/OT/"
+```
+
+Data tables were exported from Spectronaut in csv files and need to be
+loaded in R.
+
+## LIT
+
+``` r
+#Turbo
+LITDIA_Turbo_1 <- read.csv2(paste0(lit_path, "20220926_LIT_Turbo_DIA_1ng_40SPD_whisper100_1CV_auto.csv"))
+LITDIA_Turbo_5 <- read.csv2(paste0(lit_path, "20220926_LIT_Turbo_DIA_5ng_40SPD_whisper100_1CV_auto.csv"))
+LITDIA_Turbo_10 <- read.csv2(paste0(lit_path, "20220926_LIT_Turbo_DIA_10ng_40SPD_whisper100_1CV_auto.csv"))
+LITDIA_Turbo_100 <- read.csv2(paste0(lit_path, "20220926_LIT_Turbo_DIA_100ng_40SPD_whisper100_1CV_auto.csv"))
+
+#Rapid
+LITDIA_Rapid_1 <- read.csv2(paste0(lit_path, "20220926_LIT_Rapid_DIA_1ng_40SPD_whisper100_1CV_auto.csv"))
+LITDIA_Rapid_5 <- read.csv2(paste0(lit_path, "20220926_LIT_Rapid_DIA_5ng_40SPD_whisper100_1CV_auto.csv"))
+LITDIA_Rapid_10 <- read.csv2(paste0(lit_path, "20220926_LIT_Rapid_DIA_10ng_40SPD_whisper100_1CV_auto.csv"))
+LITDIA_Rapid_100 <- read.csv2(paste0(lit_path, "20220926_LIT_Rapid_DIA_100ng_40SPD_whisper100_1CV_auto.csv"))
+
+#Normal
+LITDIA_Normal_1 <- read.csv2(paste0(lit_path, "20220926_LIT_Normal_DIA_1ng_40SPD_whisper100_1CV_auto.csv"))
+LITDIA_Normal_5 <- read.csv2(paste0(lit_path, "20220926_LIT_Normal_DIA_5ng_40SPD_whisper100_1CV_auto.csv"))
+LITDIA_Normal_10 <- read.csv2(paste0(lit_path, "20220926_LIT_Normal_DIA_10ng_40SPD_whisper100_1CV_auto.csv"))
+LITDIA_Normal_100 <- read.csv2(paste0(lit_path, "20220926_LIT_Normal_DIA_100ng_40SPD_whisper100_1CV_auto.csv"))
+```
+
+## OT
+
+``` r
+#7.5k
+OTDIA_7k_1 <- read.csv2(paste0(ot_path, "20220926_OT_7k_DIA_1ng_40SPD_whisper100_1CV_auto.csv"))
+OTDIA_7k_5 <- read.csv2(paste0(ot_path, "20220926_OT_7k_DIA_5ng_40SPD_whisper100_1CV_auto.csv"))
+OTDIA_7k_10 <- read.csv2(paste0(ot_path, "20220926_OT_7k_DIA_10ng_40SPD_whisper100_1CV_auto.csv"))
+OTDIA_7k_100 <- read.csv2(paste0(ot_path, "20220926_OT_7k_DIA_100ng_40SPD_whisper100_1CV_auto.csv"))
+
+#15k
+OTDIA_15k_1 <- read.csv2(paste0(ot_path, "20220926_OT_15k_DIA_1ng_40SPD_whisper100_1CV_auto.csv"))
+OTDIA_15k_5 <- read.csv2(paste0(ot_path, "20220926_OT_15k_DIA_5ng_40SPD_whisper100_1CV_auto.csv"))
+OTDIA_15k_10 <- read.csv2(paste0(ot_path, "20220926_OT_15k_DIA_10ng_40SPD_whisper100_1CV_auto.csv"))
+OTDIA_15k_100 <- read.csv2(paste0(ot_path, "20220926_OT_15k_DIA_100ng_40SPD_whisper100_1CV_auto.csv"))
+
+#30k
+OTDIA_30k_1 <- read.csv2(paste0(ot_path, "20220926_OT_30k_DIA_1ng_40SPD_whisper100_1CV_auto.csv"))
+OTDIA_30k_5 <- read.csv2(paste0(ot_path, "20220926_OT_30k_DIA_5ng_40SPD_whisper100_1CV_auto.csv"))
+OTDIA_30k_10 <- read.csv2(paste0(ot_path, "20220926_OT_30k_DIA_10ng_40SPD_whisper100_1CV_auto.csv"))
+OTDIA_30k_100 <- read.csv2(paste0(ot_path, "20220926_OT_30k_DIA_100ng_40SPD_whisper100_1CV_auto.csv"))
+```
+
+# Clean data tables
+
+Imported tables contain a lot of informations which are not usefull for
+our analysis. The fonction below performs 5 main steps: - Create a
+consensus_PG column containing the same Protein Group for a given
+peptide. The same peptide sequence can sometime be attributed to a
+slightly different Protein Group between samples. Since we will not
+focus on proteoforms, we keep the most used Protein Group for the same
+peptide sequence as a consensus. - Replace imputed values by NA (missing
+values). - Keep only columns with the file names (replicates),
+quantitatives values for each file name, the petide sequence and the
+consensus PG. - Calculate the mean quantification between replicates. -
+Filter out peptides missing in more than 1 replicate.
+
+``` r
+filter_pep <- function(x) {
+  x_consensus  <- x %>% 
+    group_by(PEP.StrippedSequence) %>% 
+    mutate(consensus_PG = names(sort(table(PG.ProteinGroups),
+                                     decreasing = TRUE))[1])
+  x_consensus$F.PeakHeight[as.logical(x_consensus $EG.IsImputed)] <- NA
+  x_clean_with_mean  <- x_consensus  %>% 
+  group_by(R.Replicate, PEP.StrippedSequence, consensus_PG) %>% 
+  summarise(mean_peakh = mean(F.PeakHeight, na.rm = TRUE)) %>%  
+  pivot_wider(names_from = R.Replicate, 
+              values_from = mean_peakh) %>%
+    suppressMessages()
+  x_filter_highlight <- x_clean_with_mean  %>% 
+  as.data.frame() %>% 
+  mutate(na_nbr = rowSums(is.na(x_clean_with_mean [-c(1,2)]))) %>%
+  mutate(mean_peakh = 
+           rowMeans(x_clean_with_mean[3:ncol(x_clean_with_mean )], 
+                    na.rm = TRUE)) %>%
+  mutate(filtered = !na_nbr <= 1) %>% 
+  select(-na_nbr)  %>% 
+  suppressMessages("`summarise()` has grouped output by 'R.FileName'. You can override using the `.groups` argument.")
+  message("Filtered ", sum(x_filter_highlight$filtered), " peptide(s) found in less than ", ncol(x_clean_with_mean ) -3, " replicates")
+  x_filtered  <- x_filter_highlight %>% 
+  filter(filtered == FALSE)
+ return(x_filtered) }
+```
+
+The filter_pep function is run on every dataset. Informations about
+inputs and methods are added.
+
+## LIT
+
+``` r
+#Turbo
+LITDIA_Turbo_1_filter <- 
+  filter_pep(LITDIA_Turbo_1)
+```
+
+    ## Filtered 14 peptide(s) found in less than 3 replicates
+
+``` r
+LITDIA_Turbo_1_filter$input <- 1
+LITDIA_Turbo_1_filter$method <- "Turbo"
+
+LITDIA_Turbo_5_filter <- 
+  filter_pep(LITDIA_Turbo_5)
+```
+
+    ## Filtered 27 peptide(s) found in less than 3 replicates
+
+``` r
+LITDIA_Turbo_5_filter$input <- 5
+LITDIA_Turbo_5_filter$method <- "Turbo"
+
+LITDIA_Turbo_10_filter <- 
+  filter_pep(LITDIA_Turbo_10)
+```
+
+    ## Filtered 14 peptide(s) found in less than 3 replicates
+
+``` r
+LITDIA_Turbo_10_filter$input <- 10
+LITDIA_Turbo_10_filter$method <- "Turbo"
+
+LITDIA_Turbo_100_filter <- 
+  filter_pep(LITDIA_Turbo_100)
+```
+
+    ## Filtered 324 peptide(s) found in less than 3 replicates
+
+``` r
+LITDIA_Turbo_100_filter$input <- 100
+LITDIA_Turbo_100_filter$method <- "Turbo"
+
+#Rapid
+LITDIA_Rapid_1_filter <- 
+  filter_pep(LITDIA_Rapid_1)
+```
+
+    ## Filtered 12 peptide(s) found in less than 3 replicates
+
+``` r
+LITDIA_Rapid_1_filter$input <- 1
+LITDIA_Rapid_1_filter$method <- "Rapid"
+
+LITDIA_Rapid_5_filter <- 
+  filter_pep(LITDIA_Rapid_5)
+```
+
+    ## Filtered 15 peptide(s) found in less than 3 replicates
+
+``` r
+LITDIA_Rapid_5_filter$input <- 5
+LITDIA_Rapid_5_filter$method <- "Rapid"
+
+LITDIA_Rapid_10_filter <- 
+  filter_pep(LITDIA_Rapid_10)
+```
+
+    ## Filtered 21 peptide(s) found in less than 3 replicates
+
+``` r
+LITDIA_Rapid_10_filter$input <- 10
+LITDIA_Rapid_10_filter$method <- "Rapid"
+
+LITDIA_Rapid_100_filter <- 
+  filter_pep(LITDIA_Rapid_100)
+```
+
+    ## Filtered 282 peptide(s) found in less than 3 replicates
+
+``` r
+LITDIA_Rapid_100_filter$input <- 100
+LITDIA_Rapid_100_filter$method <- "Rapid"
+
+#Normal
+LITDIA_Normal_1_filter <- 
+  filter_pep(LITDIA_Normal_1)
+```
+
+    ## Filtered 41 peptide(s) found in less than 3 replicates
+
+``` r
+LITDIA_Normal_1_filter$input <- 1
+LITDIA_Normal_1_filter$method <- "Normal"
+
+LITDIA_Normal_5_filter <- 
+  filter_pep(LITDIA_Normal_5)
+```
+
+    ## Filtered 31 peptide(s) found in less than 3 replicates
+
+``` r
+LITDIA_Normal_5_filter$input <- 5
+LITDIA_Normal_5_filter$method <- "Normal"
+
+LITDIA_Normal_10_filter <- 
+  filter_pep(LITDIA_Normal_10)
+```
+
+    ## Filtered 29 peptide(s) found in less than 3 replicates
+
+``` r
+LITDIA_Normal_10_filter$input <- 10
+LITDIA_Normal_10_filter$method <- "Normal"
+
+LITDIA_Normal_100_filter <- 
+  filter_pep(LITDIA_Normal_100)
+```
+
+    ## Filtered 316 peptide(s) found in less than 3 replicates
+
+``` r
+LITDIA_Normal_100_filter$input <- 100
+LITDIA_Normal_100_filter$method <- "Normal"
+```
+
+## OT
+
+``` r
+#7.5k
+OTDIA_7k_1_filter <- 
+  filter_pep(OTDIA_7k_1)
+```
+
+    ## Filtered 5 peptide(s) found in less than 3 replicates
+
+``` r
+OTDIA_7k_1_filter$input <- 1
+OTDIA_7k_1_filter$method <- "7.5k"
+
+OTDIA_7k_5_filter <- 
+  filter_pep(OTDIA_7k_5)
+```
+
+    ## Filtered 22 peptide(s) found in less than 3 replicates
+
+``` r
+OTDIA_7k_5_filter$input <- 5
+OTDIA_7k_5_filter$method <- "7.5k"
+
+OTDIA_7k_10_filter <- 
+  filter_pep(OTDIA_7k_10)
+```
+
+    ## Filtered 50 peptide(s) found in less than 3 replicates
+
+``` r
+OTDIA_7k_10_filter$input <- 10
+OTDIA_7k_10_filter$method <- "7.5k"
+
+OTDIA_7k_100_filter <- 
+  filter_pep(OTDIA_7k_100)
+```
+
+    ## Filtered 182 peptide(s) found in less than 3 replicates
+
+``` r
+OTDIA_7k_100_filter$input <- 100
+OTDIA_7k_100_filter$method <- "7.5k"
+
+#15k
+OTDIA_15k_1_filter <- 
+  filter_pep(OTDIA_15k_1)
+```
+
+    ## Filtered 7 peptide(s) found in less than 3 replicates
+
+``` r
+OTDIA_15k_1_filter$input <- 1
+OTDIA_15k_1_filter$method <- "15k"
+
+OTDIA_15k_5_filter <- 
+  filter_pep(OTDIA_15k_5)
+```
+
+    ## Filtered 89 peptide(s) found in less than 3 replicates
+
+``` r
+OTDIA_15k_5_filter$input <- 5
+OTDIA_15k_5_filter$method <- "15k"
+
+OTDIA_15k_10_filter <- 
+  filter_pep(OTDIA_15k_10)
+```
+
+    ## Filtered 46 peptide(s) found in less than 3 replicates
+
+``` r
+OTDIA_15k_10_filter$input <- 10
+OTDIA_15k_10_filter$method <- "15k"
+
+OTDIA_15k_100_filter <- 
+  filter_pep(OTDIA_15k_100)
+```
+
+    ## Filtered 132 peptide(s) found in less than 3 replicates
+
+``` r
+OTDIA_15k_100_filter$input <- 100
+OTDIA_15k_100_filter$method <- "15k"
+
+#30k
+OTDIA_30k_1_filter <- 
+  filter_pep(OTDIA_30k_1)
+```
+
+    ## Filtered 38 peptide(s) found in less than 3 replicates
+
+``` r
+OTDIA_30k_1_filter$input <- 1
+OTDIA_30k_1_filter$method <- "30k"
+
+OTDIA_30k_5_filter <- 
+  filter_pep(OTDIA_30k_5)
+```
+
+    ## Filtered 614 peptide(s) found in less than 3 replicates
+
+``` r
+OTDIA_30k_5_filter$input <- 5
+OTDIA_30k_5_filter$method <- "30k"
+
+OTDIA_30k_10_filter <- 
+  filter_pep(OTDIA_30k_10)
+```
+
+    ## Filtered 194 peptide(s) found in less than 3 replicates
+
+``` r
+OTDIA_30k_10_filter$input <- 10
+OTDIA_30k_10_filter$method <- "30k"
+
+OTDIA_30k_100_filter <- 
+  filter_pep(OTDIA_30k_100)
+```
+
+    ## Filtered 271 peptide(s) found in less than 3 replicates
+
+``` r
+OTDIA_30k_100_filter$input <- 100
+OTDIA_30k_100_filter$method <- "30k"
+```
+
+# Join datasets
+
+LIT and OT datasets are joined and a column mass_analyzer is added.
+
+``` r
+LIT <- rbind(LITDIA_Turbo_1_filter,
+      LITDIA_Turbo_5_filter, 
+      LITDIA_Turbo_10_filter,
+      LITDIA_Turbo_100_filter,
+      LITDIA_Rapid_1_filter,
+      LITDIA_Rapid_5_filter,
+      LITDIA_Rapid_10_filter,
+      LITDIA_Rapid_100_filter,
+      LITDIA_Normal_1_filter,
+      LITDIA_Normal_5_filter,
+      LITDIA_Normal_10_filter,
+      LITDIA_Normal_100_filter)
+LIT$mass_analyzer <- "LIT"
+
+OT <- rbind(OTDIA_7k_1_filter,
+      OTDIA_7k_5_filter, 
+      OTDIA_7k_10_filter,
+      OTDIA_7k_100_filter,
+      OTDIA_15k_1_filter,
+      OTDIA_15k_5_filter,
+      OTDIA_15k_10_filter,
+      OTDIA_15k_100_filter,
+      OTDIA_30k_1_filter,
+      OTDIA_30k_5_filter,
+      OTDIA_30k_10_filter,
+      OTDIA_30k_100_filter)
+OT$mass_analyzer <- "OT"
+
+LITvsOT <- rbind(LIT, OT)
+
+#clean colnames
+colnames(LITvsOT)[3:6] <- paste("Replicate", colnames(LITvsOT)[3:6], sep = "_")
+
+#factor method
+LITvsOT$method <- 
+  factor(LITvsOT$method, 
+         levels = c("7.5k", "15k", "30k", "Turbo", "Rapid", "Normal"))
+```
+
+# Figure A
+
+## Peptide aggregation
+
+To infer the protein intensities from peptides, we aggregated peptides
+using for each replicate the mean of each peptides belonging to the same
+Protein Group.
+
+``` r
+dim(LITvsOT)
+```
+
+    ## [1] 154717     11
+
+``` r
+LITvsOT_prot <- LITvsOT %>%
+  group_by(consensus_PG, mass_analyzer, input, method) %>% 
+  summarise(prot_1 = mean(Replicate_1),
+            prot_2 = mean(Replicate_2),
+            prot_3 = mean(Replicate_3),
+            prot_4 = mean(Replicate_4))
+```
+
+    ## `summarise()` has grouped output by 'consensus_PG', 'mass_analyzer', 'input'.
+    ## You can override using the `.groups` argument.
+
+``` r
+dim(LITvsOT_prot)
+```
+
+    ## [1] 44059     8
+
+``` r
+LITvsOT_prot %>% 
+  ggplot(aes(y = log10(prot_1)))+
+  geom_boxplot()+
+  geom_hline(yintercept = 0,
+             color = "red",
+             linetype = "dashed")
+```
+
+    ## Warning: Removed 1015 rows containing non-finite values (stat_boxplot).
+
+![](Figure2_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+
+``` r
+LITvsOT_prot %>% 
+  ggplot(aes(y = log10(prot_2)))+
+  geom_boxplot()+
+  geom_hline(yintercept = log10(5),
+             color = "red",
+             linetype = "dashed")
+```
+
+    ## Warning: Removed 1002 rows containing non-finite values (stat_boxplot).
+
+![](Figure2_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
+
+``` r
+LITvsOT_prot <- LITvsOT_prot %>% 
+  filter(prot_1 > 5 &
+           prot_2 > 5)
+```
+
+## Plot A
+
+Correlations bewteen replicate one and replicate two are plotted for
+each method and input in scatter plots using ggplot.
+
+``` r
+#Calculate limits for each axis
+lim_x <- 
+  log10(c(min(LITvsOT_prot$prot_1[LITvsOT_prot$prot_1 != 1], na.rm = TRUE), 
+    max(LITvsOT_prot$prot_1, na.rm = TRUE)))
+lim_y <- 
+ log10(c(min(LITvsOT_prot$prot_2[LITvsOT_prot$prot_2 != 1], na.rm = TRUE),
+    max(LITvsOT_prot$prot_2, na.rm = TRUE)))
+
+# 1 ng
+corr_prot_1ng_LIT <- LITvsOT_prot %>% 
+  filter(input == 1 &
+           mass_analyzer == "LIT") %>%  
+  ggplot(aes(x = log10(prot_1), y = log10(prot_2)))+
+  geom_pointdensity(size = 1.5)+
+  scale_color_viridis_c()+
+  facet_grid(mass_analyzer ~ method)+
+  scale_x_continuous(limits = lim_x)+
+  scale_y_continuous(limits = lim_y)+
+  theme_bw()+
+  stat_cor(method = "pearson",
+           aes(label = ..r.label..),
+           r.digits = 3,
+           size = 7,
+           label.x.npc = 0,
+           label.y.npc = 0.9)+
+  labs(title = "A                               1 ng input",
+       x = "log10(F.PeakHeight) Replicate #1",
+       y = "log10(F.PeakHeight) Replicate #2")+
+  theme(legend.position = "none",
+        axis.title = element_text(size = 27),
+        axis.text = element_text(size = 24),
+        strip.text.x = element_text(size = 27),
+        strip.text.y = element_text(size = 27, vjust = 1.2),
+        strip.background = element_rect(fill = "#E5E4F7"),
+        plot.title = element_text(size = 29,
+                                  hjust = -0.32,
+                                  vjust = 3,
+                                  face = "bold"))
+
+corr_prot_1ng_OT <- LITvsOT_prot %>% 
+  filter(input == 1 &
+           mass_analyzer == "OT") %>%  
+  ggplot(aes(x = log10(prot_1), y = log10(prot_2)))+
+  geom_pointdensity(size = 1.5)+
+  scale_color_viridis_c()+
+  facet_grid(mass_analyzer ~ method)+
+  scale_x_continuous(limits = lim_x)+
+  scale_y_continuous(limits = lim_y)+
+  theme_bw()+
+  stat_cor(method = "pearson",
+           aes(label = ..r.label..),
+           r.digits = 3,
+           size = 7,
+           label.x.npc = 0,
+           label.y.npc = 0.9)+
+  labs(title = "1 ng input",
+       x = "log10(F.PeakHeight) Replicate #1",
+       y = "log10(F.PeakHeight) Replicate #2")+
+  theme(legend.position = "none",
+        axis.title = element_text(size = 27),
+        axis.text = element_text(size = 24),
+        strip.text.x = element_text(size = 27),
+        strip.text.y = element_text(size = 27, vjust = 1.2),
+        strip.background = element_rect(fill = "#E5E4F7"),
+        plot.title = element_text(size = 29,
+                                  hjust = 0.5,
+                                  vjust = 3,
+                                  face = "bold"))
+
+# 5 ng
+corr_prot_5ng_LIT <- LITvsOT_prot %>% 
+  filter(input == 5 &
+           mass_analyzer == "LIT") %>%  
+  ggplot(aes(x = log10(prot_1), y = log10(prot_2)))+
+  geom_pointdensity(size = 1.5)+
+  scale_color_viridis_c()+
+  facet_grid(mass_analyzer ~ method)+
+  scale_x_continuous(limits = lim_x)+
+  scale_y_continuous(limits = lim_y)+
+  theme_bw()+
+  stat_cor(method = "pearson",
+           aes(label = ..r.label..),
+           r.digits = 3,
+           size = 7,
+           label.x.npc = 0,
+           label.y.npc = 0.9)+
+  labs(title = "5 ng input",
+       x = "log10(F.PeakHeight) Replicate #1",
+       y = "log10(F.PeakHeight) Replicate #2")+
+  theme(legend.position = "none",
+        axis.title = element_text(size = 27),
+        axis.text = element_text(size = 24),
+        strip.text.x = element_text(size = 27),
+        strip.text.y = element_text(size = 27, vjust = 1.2),
+        strip.background = element_rect(fill = "#E5E4F7"),
+        plot.title = element_text(size = 29,
+                                  hjust = 0.5,
+                                  vjust = 3,
+                                  face = "bold"))
+
+corr_prot_5ng_OT <- LITvsOT_prot %>% 
+  filter(input == 5 &
+           mass_analyzer == "OT") %>%  
+  ggplot(aes(x = log10(prot_1), y = log10(prot_2)))+
+  geom_pointdensity(size = 1.5)+
+  scale_color_viridis_c()+
+  facet_grid(mass_analyzer ~ method)+
+  scale_x_continuous(limits = lim_x)+
+  scale_y_continuous(limits = lim_y)+
+  theme_bw()+
+  stat_cor(method = "pearson",
+           aes(label = ..r.label..),
+           r.digits = 3,
+           size = 7,
+           label.x.npc = 0,
+           label.y.npc = 0.9)+
+  labs(title = "5 ng input",
+       x = "log10(F.PeakHeight) Replicate #1",
+       y = "log10(F.PeakHeight) Replicate #2")+
+  theme(legend.position = "none",
+        axis.title = element_text(size = 27),
+        axis.text = element_text(size = 24),
+        strip.text.x = element_text(size = 27),
+        strip.text.y = element_text(size = 27, vjust = 1.2),
+        strip.background = element_rect(fill = "#E5E4F7"),
+        plot.title = element_text(size = 29,
+                                  hjust = 0.5,
+                                  vjust = 3,
+                                  face = "bold"))
+
+# 10 ng
+corr_prot_10ng_LIT <- LITvsOT_prot %>% 
+  filter(input == 10 &
+           mass_analyzer == "LIT") %>%  
+  ggplot(aes(x = log10(prot_1), y = log10(prot_2)))+
+  geom_pointdensity(size = 1.5)+
+  scale_color_viridis_c()+
+  facet_grid(mass_analyzer ~ method)+
+  scale_x_continuous(limits = lim_x)+
+  scale_y_continuous(limits = lim_y)+
+  theme_bw()+
+  stat_cor(method = "pearson",
+           aes(label = ..r.label..),
+           r.digits = 3,
+           size = 7,
+           label.x.npc = 0,
+           label.y.npc = 0.9)+
+  labs(title = "10 ng input",
+       x = "log10(F.PeakHeight) Replicate #1",
+       y = "log10(F.PeakHeight) Replicate #2")+
+  theme(legend.position = "none",
+        axis.title = element_text(size = 27),
+        axis.text = element_text(size = 24),
+        strip.text.x = element_text(size = 27),
+        strip.text.y = element_text(size = 27, vjust = 1.2),
+        strip.background = element_rect(fill = "#E5E4F7"),
+        plot.title = element_text(size = 29,
+                                  hjust = 0.5,
+                                  vjust = 3,
+                                  face = "bold"))
+
+
+corr_prot_10ng_OT <- LITvsOT_prot %>% 
+  filter(input == 10 &
+           mass_analyzer == "OT") %>%  
+  ggplot(aes(x = log10(prot_1), y = log10(prot_2)))+
+  geom_pointdensity(size = 1.5)+
+  scale_color_viridis_c()+
+  facet_grid(mass_analyzer ~ method)+
+  scale_x_continuous(limits = lim_x)+
+  scale_y_continuous(limits = lim_y)+
+  theme_bw()+
+  stat_cor(method = "pearson",
+           aes(label = ..r.label..),
+           r.digits = 3,
+           size = 7,
+           label.x.npc = 0,
+           label.y.npc = 0.9)+
+  labs(title = "10 ng input",
+       x = "log10(F.PeakHeight) Replicate #1",
+       y = "log10(F.PeakHeight) Replicate #2")+
+  theme(legend.position = "none",
+        axis.title = element_text(size = 27),
+        axis.text = element_text(size = 24),
+        strip.text.x = element_text(size = 27),
+        strip.text.y = element_text(size = 27, vjust = 1.2),
+        strip.background = element_rect(fill = "#E5E4F7"),
+        plot.title = element_text(size = 29,
+                                  hjust = 0.5,
+                                  vjust = 3,
+                                  face = "bold"),
+        plot.margin = margin(b = 20))
+
+
+# 100 ng
+corr_prot_100ng_LIT <- LITvsOT_prot %>% 
+  filter(input == 100 &
+           mass_analyzer == "LIT") %>%  
+  ggplot(aes(x = log10(prot_1), y = log10(prot_2)))+
+  geom_pointdensity(size = 1.5)+
+  scale_color_viridis_c()+
+  facet_grid(mass_analyzer ~ method)+
+  scale_x_continuous(limits = lim_x)+
+  scale_y_continuous(limits = lim_y)+
+  theme_bw()+
+  stat_cor(method = "pearson",
+           aes(label = ..r.label..),
+           r.digits = 3,
+           size = 7,
+           label.x.npc = 0,
+           label.y.npc = 0.9)+
+  labs(title = "100 ng input",
+       x = "log10(F.PeakHeight) Replicate #1",
+       y = "log10(F.PeakHeight) Replicate #2")+
+  theme(legend.position = "none",
+        axis.title = element_text(size = 27),
+        axis.text = element_text(size = 24),
+        strip.text.x = element_text(size = 27),
+        strip.text.y = element_text(size = 27, vjust = 1.2),
+        strip.background = element_rect(fill = "#E5E4F7"),
+        plot.title = element_text(size = 29,
+                                  hjust = 0.5,
+                                  vjust = 3,
+                                  face = "bold"))
+
+corr_prot_100ng_OT <- LITvsOT_prot %>% 
+  filter(input == 100 &
+           mass_analyzer == "OT") %>%  
+  ggplot(aes(x = log10(prot_1), y = log10(prot_2)))+
+  geom_pointdensity(size = 1.5)+
+  scale_color_viridis_c()+
+  facet_grid(mass_analyzer ~ method)+
+  scale_x_continuous(limits = lim_x)+
+  scale_y_continuous(limits = lim_y)+
+  theme_bw()+
+  stat_cor(method = "pearson",
+           aes(label = ..r.label..),
+           r.digits = 3,
+           size = 7,
+           label.x.npc = 0,
+           label.y.npc = 0.9)+
+  labs(title = "100 ng input",
+       x = "log10(F.PeakHeight) Replicate #1",
+       y = "log10(F.PeakHeight) Replicate #2")+
+  theme(legend.position = "none",
+        axis.title = element_text(size = 27),
+        axis.text = element_text(size = 24),
+        strip.text.x = element_text(size = 27),
+        strip.text.y = element_text(size = 27, vjust = 1.2),
+        strip.background = element_rect(fill = "#E5E4F7"),
+        plot.title = element_text(size = 29,
+                                  hjust = 0.5,
+                                  vjust = 3,
+                                  face = "bold"),
+        plot.margin = margin(b = 20))
+```
+
+Plots from 1, 5, 10 and 100 ng are joined using patchwork.
+
+``` r
+# 1 ng
+corr_1ng_prot <- 
+  (corr_prot_1ng_LIT+
+     theme(axis.title = element_blank(),
+           axis.text.x = element_blank(),
+           axis.ticks.x = element_blank()))/
+  (corr_prot_1ng_OT+
+     theme(axis.title.x = element_blank(),
+           axis.title.y = element_text(hjust = -0.15, vjust = 2.5),
+           plot.title = element_blank(),
+           plot.margin = margin(b = 22)))
+
+# 5 ng
+corr_5ng_prot <- (corr_prot_5ng_LIT +
+    theme(axis.title = element_blank(),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank()))/
+  (corr_prot_5ng_OT +
+     theme(axis.title = element_blank(),
+           axis.title.y = element_blank(),
+           plot.title = element_blank(),
+           plot.margin = margin(b = 22)))
+
+# 10 ng
+corr_10ng_prot <- (corr_prot_10ng_LIT +
+    theme(axis.title = element_blank(),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.margin = margin(t = 22)))/
+  (corr_prot_10ng_OT +
+     theme(axis.title.y = element_text(hjust = -0.15, vjust = 2.5),
+           plot.title = element_blank(),
+           axis.title.x = element_text(vjust = -0.7)))
+
+# 100 ng
+corr_100ng_prot <- (corr_prot_100ng_LIT +
+    theme(axis.title = element_blank(),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.margin = margin(t = 22)))/
+  (corr_prot_100ng_OT +
+     theme(axis.title.y = element_blank(),
+           plot.title = element_blank(),
+           axis.title.x = element_text(vjust = -0.7)))
+
+figure2a <- wrap_plots(corr_1ng_prot, corr_5ng_prot, 
+                       corr_10ng_prot, corr_100ng_prot, 
+                       ncol = 2, nrow = 2)
+```
+
+# Figure S6
+
+``` r
+LITvsOT_prot$method <- factor(LITvsOT_prot$method, levels = c("Turbo", "Rapid", "Normal", "7.5k", "15k", "30k"))
+
+fig_S6 <- LITvsOT_prot %>% 
+  filter(input %in% c(1, 100) &
+          method %in% c("Normal", "30k")) %>%  
+  ggplot(aes(x = log10(prot_1), y = log10(prot_2)))+
+  geom_pointdensity(size = 1.5)+
+  scale_color_viridis_c()+
+  facet_grid(input ~ method, 
+             labeller = as_labeller(c('1' = "1 ng",
+                                      '100' = "100 ng",
+                                      "Normal" = "LIT Normal",
+                                      "30k" = "OT 30k")))+
+  scale_x_continuous(limits = lim_x)+
+  scale_y_continuous(limits = lim_y)+
+  theme_bw()+
+  stat_cor(method = "pearson",
+           aes(label = ..r.label..),
+           r.digits = 3,
+           size = 7,
+           label.x.npc = 0,
+           label.y.npc = 0.9)+
+  labs(x = "log10(F.PeakHeight) Replicate #1",
+       y = "log10(F.PeakHeight) Replicate #2")+
+  theme(legend.position = "none",
+        axis.title = element_text(size = 27),
+        axis.text = element_text(size = 24),
+        strip.text.x = element_text(size = 27),
+        strip.text.y = element_text(size = 27, vjust = 1.2),
+        strip.background = element_rect(fill = "#E5E4F7"),
+        plot.margin = margin(b = 20))
+
+fig_S6
+```
+
+![](Figure2_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+
+``` r
+#cairo_pdf(filename = "fig_sup6.pdf", width = 10.42, height = 8.33)
+#fig_S6
+#dev.off()
+```
+
+# Figure B
+
+The linear quantitative response curve on peptide level of the dilution
+series of tryptic HeLa (1-, 5-, 10-, and 100 ng).
+
+## Normalise intensity
+
+To help interpretability, intensity from different methods are
+normalised to make the median value of 1 ng represent an intensity of 1.
+The is acheived by dividing all intensities by the median value of the 1
+ng sample of the corresponding method.
+
+``` r
+LITvsOT_wide <- LITvsOT[, -c(3:6, 8)] %>% 
+  pivot_wider(names_from = method, values_from = mean_peakh)
+  
+LITvsOT_wide_norm <- LITvsOT_wide %>% 
+  mutate(Turbo_normalised = 
+           Turbo/median(LITvsOT_wide[LITvsOT_wide$input == 1,]$Turbo, 
+                                         na.rm = TRUE)) %>% 
+  mutate(Rapid_normalised = 
+           Rapid/median(LITvsOT_wide[LITvsOT_wide$input == 1,]$Rapid, 
+                                         na.rm = TRUE)) %>% 
+  mutate(Normal_normalised = 
+           Turbo/median(LITvsOT_wide[LITvsOT_wide$input == 1,]$Normal,
+                                          na.rm = TRUE)) %>% 
+  mutate(`7.5k_normalised` = 
+           `7.5k`/median(LITvsOT_wide[LITvsOT_wide$input == 1,]$`7.5k`,
+                                           na.rm = TRUE)) %>% 
+  mutate(`15k_normalised` = 
+           `15k`/median(LITvsOT_wide[LITvsOT_wide$input == 1,]$`15k`,
+                                           na.rm = TRUE)) %>% 
+  mutate(`30k_normalised` = 
+           `30k`/median(LITvsOT_wide[LITvsOT_wide$input == 1,]$`30k`,
+                                           na.rm = TRUE))
+
+LITvsOT_norm <- LITvsOT_wide_norm[, -c(5:10)] %>%
+  pivot_longer(names_to = "method", 
+               values_to = "normalised_intensity",
+               -c(PEP.StrippedSequence, consensus_PG,
+                  input, mass_analyzer)) %>% 
+  filter(!is.na(normalised_intensity))
+
+#factor method
+LITvsOT_norm$method <- 
+  factor(LITvsOT_norm$method, 
+         levels = c("7.5k_normalised", "15k_normalised", 
+                    "30k_normalised", "Turbo_normalised",
+                    "Rapid_normalised", "Normal_normalised"))
+```
+
+## Plot B
+
+Distributions of intensities are plotted for each methods and input in
+boxplots using ggplot. Outliers are not shown.
+
+``` r
+intensity_boxplot_LIT <- LITvsOT_norm %>% 
+  filter(mass_analyzer == "LIT") %>% 
+  ggplot(aes(x = as.factor(input), y = log10(normalised_intensity)))+
+  geom_boxplot(outlier.shape = NA,
+               fill = "#D1E5EB",
+               size = 0.7)+
+  scale_y_continuous(limits = c(-1.2, 2.5))+
+  facet_grid(mass_analyzer ~ method, 
+             labeller = as_labeller(c("Turbo_normalised" = "Turbo",
+                                      "Rapid_normalised" = "Rapid",
+                                      "Normal_normalised" = "Normal",
+                                      "LIT" = "LIT")))+
+  theme_bw()+
+  theme(axis.text = element_text(size = 24),
+        axis.title = element_text(size = 27),
+        strip.text = element_text(size = 27),
+        strip.background = element_rect(fill = "#E5E4F7"),
+        plot.title = element_text(size = 32, face = "bold",
+                                  hjust = -0.1),
+        plot.margin = margin(t = 25))+
+  labs(x = "Input (ng)",
+       y = "log10(Normalised F.PeakHeight)",
+       title = "B")
+
+intensity_boxplot_OT <- LITvsOT_norm %>% 
+  filter(mass_analyzer == "OT") %>% 
+  ggplot(aes(x = as.factor(input), y = log10(normalised_intensity)))+
+  geom_boxplot(outlier.shape = NA,
+               fill = "#D1E5EB",
+               size = 0.7)+
+  scale_y_continuous(limits = c(-1.2, 2.5))+
+  facet_grid(mass_analyzer ~ method, 
+             labeller = as_labeller(c("7.5k_normalised" = "7.5k",
+                                      "15k_normalised" = "15k",
+                                      "30k_normalised" = "30k",
+                                      "OT" = "OT")))+
+  theme_bw()+
+  theme(axis.text = element_text(size = 24),
+        axis.title = element_text(size = 27),
+        strip.text = element_text(size = 27),
+        strip.background = element_rect(fill = "#E5E4F7"),
+        plot.title = element_text(size = 32, face = "bold",
+                                  hjust = -0.1))+
+  labs(x = "Input (ng)",
+       y = "log10(Normalised F.PeakHeight)")
+```
+
+Plots from LIT and OT are joined together using patchwork.
+
+``` r
+figure2b <- 
+  (intensity_boxplot_LIT  +
+    theme(axis.title = element_blank(),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank()))/
+  (intensity_boxplot_OT +
+     theme(axis.title.y = element_text(hjust = -0.25, vjust = 2.5)))
+figure2b
+```
+
+    ## Warning: Removed 436 rows containing non-finite values (stat_boxplot).
+
+    ## Warning: Removed 196 rows containing non-finite values (stat_boxplot).
+
+![](Figure2_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+
+# Join A and B
+
+``` r
+figure2b <- 
+  (plot_spacer() + figure2b + plot_spacer()) +
+  plot_layout(width = c(0.4, 3, 0.4))
+
+figure2 <- (figure2a / figure2b) + plot_layout(heights = c(2,1))
+
+#Save as pdf
+#cairo_pdf(filename = "fig2.pdf", width = 18.75, height = 25)
+#figure2
+#dev.off()
+```
